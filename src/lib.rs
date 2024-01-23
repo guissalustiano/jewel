@@ -1,14 +1,14 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+#![no_std]
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod channel;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+/// BLE advertising address for 4.* advertising packets
+///
+/// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-ddca5d1e-d894-5b28-4322-94b1c69bef07
+pub const ADV_ADDRESS: u32 = 0x8E89BED6;
+
+/// BLE advertising CRC initial value, 24 bits
+/// For all other Advertising Physical Ch PDUs, the shift register shall be preset with 0x555555
+///
+/// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-ef2b6d91-cee4-fb69-3b93-c1a5948aadae
+pub const ADV_CRC_INIT: u32 = 0x555555;
