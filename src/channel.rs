@@ -1,34 +1,6 @@
-/// 3 of the 39 RF channels used for initial advertising and all legacy advertising activitie.
-///
-/// https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3abb4023-1a31-b4db-cb9d-a70064cb40a0
-pub enum PrimaryAdvertisingChannel {
-    #[doc = "Channel 37"]
-    Ch37,
-
-    #[doc = "Channel 38"]
-    Ch38,
-
-    #[doc = "Channel 39"]
-    Ch39,
-}
-
-impl PrimaryAdvertisingChannel {
-    // https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8d4b6daf-4142-e928-81d1-520529d8277f
-    fn physical_index(&self) -> u8 {
-        match self {
-            PrimaryAdvertisingChannel::Ch37 => 37,
-            PrimaryAdvertisingChannel::Ch38 => 38,
-            PrimaryAdvertisingChannel::Ch39 => 39,
-        }
-    }
-
-    fn channel_index(&self) -> u8 {
-        match self {
-            PrimaryAdvertisingChannel::Ch37 => 0,
-            PrimaryAdvertisingChannel::Ch38 => 12,
-            PrimaryAdvertisingChannel::Ch39 => 39,
-        }
-    }
+pub trait Channel {
+    fn physical_index(&self) -> u8;
+    fn channel_index(&self) -> u8;
 
     /// RF channel center frequency in MHz
     /// https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8d4b6daf-4142-e928-81d1-520529d8277f
@@ -39,7 +11,7 @@ impl PrimaryAdvertisingChannel {
     /// assert_eq!(PrimaryAdvertisingChannel::Channel38.central_frequency(), 2426);
     /// assert_eq!(PrimaryAdvertisingChannel::Channel39.central_frequency(), 2480);
     /// ```
-    pub fn central_frequency(&self) -> u16 {
+    fn central_frequency(&self) -> u16 {
         2402u16 + (self.channel_index() as u16) * 2u16
     }
 
@@ -71,7 +43,41 @@ impl PrimaryAdvertisingChannel {
     /// assert_eq!(PrimaryAdvertisingChannel::Channel38.whitening_init(), 0x7C);
     /// assert_eq!(PrimaryAdvertisingChannel::Channel39.whitening_init(), 0x77);
     /// ```
-    pub fn whitening_init(&self) -> u8 {
+    fn whitening_init(&self) -> u8 {
         0b01000000 | self.physical_index()
+    }
+}
+
+/// 3 of the 39 RF channels used for initial advertising and all legacy advertising activitie.
+///
+/// https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3abb4023-1a31-b4db-cb9d-a70064cb40a0
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PrimaryAdvertisingChannel {
+    #[doc = "Channel 37"]
+    Ch37,
+
+    #[doc = "Channel 38"]
+    Ch38,
+
+    #[doc = "Channel 39"]
+    Ch39,
+}
+
+impl Channel for PrimaryAdvertisingChannel {
+    // https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8d4b6daf-4142-e928-81d1-520529d8277f
+    fn physical_index(&self) -> u8 {
+        match self {
+            PrimaryAdvertisingChannel::Ch37 => 37,
+            PrimaryAdvertisingChannel::Ch38 => 38,
+            PrimaryAdvertisingChannel::Ch39 => 39,
+        }
+    }
+
+    fn channel_index(&self) -> u8 {
+        match self {
+            PrimaryAdvertisingChannel::Ch37 => 0,
+            PrimaryAdvertisingChannel::Ch38 => 12,
+            PrimaryAdvertisingChannel::Ch39 => 39,
+        }
     }
 }
