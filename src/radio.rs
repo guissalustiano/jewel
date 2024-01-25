@@ -97,8 +97,8 @@ pub trait BleRadio {
     }
 
     /// Transmit the packaget in the  buffer
-    fn transmit(&mut self) -> impl Future<Output = ()> + Send;
+    async fn transmit(&mut self);
 
     /// Receive the packaget to the buffer
-    fn receive(&mut self) -> impl Future<Output = ()> + Send;
+    async fn receive(&mut self);
 }
