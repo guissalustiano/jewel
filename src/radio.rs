@@ -1,3 +1,5 @@
+use core::future::Future;
+
 use crate::channel::Channel;
 
 /// BLE packet format for the LE Uncoded PHYs
@@ -95,8 +97,8 @@ pub trait BleRadio {
     }
 
     /// Transmit the packaget in the  buffer
-    async fn transmit(&mut self);
+    fn transmit(&mut self) -> impl Future<Output = ()> + Send;
 
     /// Receive the packaget to the buffer
-    async fn receive(&mut self);
+    fn receive(&mut self) -> impl Future<Output = ()> + Send;
 }
