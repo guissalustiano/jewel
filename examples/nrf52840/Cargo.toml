@@ -49,7 +49,7 @@ serde = { version = "1.0.136", default-features = false }
 embedded-hal = { version = "1.0" }
 embedded-hal-async = { version = "1.0" }
 embedded-hal-bus = { version = "0.1", features = ["async"] }
-jewel = { path = "../.." }
+jewel = { git = "https://github.com/guissalustiano/jewel-rs.git", branch = "main" }
 
 [profile.release]
 debug = 2

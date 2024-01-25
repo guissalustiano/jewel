@@ -43,9 +43,9 @@ checksum = "374d28ec25809ee0e23827c2ab573d729e293f281dfe393500e7ad618baa61c6"
 
 [[package]]
 name = "byteorder"
-version = "1.4.3"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
+checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "cfg-if"
@@ -187,6 +187,7 @@ dependencies = [
 [[package]]
 name = "embassy-embedded-hal"
 version = "0.1.0"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 dependencies = [
  "defmt",
  "embassy-futures",
@@ -203,6 +204,7 @@ dependencies = [
 [[package]]
 name = "embassy-executor"
 version = "0.5.0"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 dependencies = [
  "cortex-m",
  "critical-section",
@@ -216,6 +218,7 @@ dependencies = [
 [[package]]
 name = "embassy-executor-macros"
 version = "0.4.1"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -226,10 +229,12 @@ dependencies = [
 [[package]]
 name = "embassy-futures"
 version = "0.1.1"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 
 [[package]]
 name = "embassy-hal-internal"
 version = "0.1.0"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 dependencies = [
  "cortex-m",
  "critical-section",
@@ -240,6 +245,7 @@ dependencies = [
 [[package]]
 name = "embassy-nrf"
 version = "0.1.0"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 dependencies = [
  "cfg-if",
  "cortex-m",
@@ -261,7 +267,7 @@ dependencies = [
  "embedded-storage",
  "embedded-storage-async",
  "fixed",
- "jewel",
+ "jewel 0.1.0 (git+https://github.com/guissalustiano/jewel-rs.git)",
  "nrf52805-pac",
  "nrf52810-pac",
  "nrf52811-pac",
@@ -278,6 +284,7 @@ dependencies = [
 [[package]]
 name = "embassy-sync"
 version = "0.5.0"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 dependencies = [
  "cfg-if",
  "critical-section",
@@ -290,6 +297,7 @@ dependencies = [
 [[package]]
 name = "embassy-time"
 version = "0.3.0"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 dependencies = [
  "cfg-if",
  "critical-section",
@@ -307,6 +315,7 @@ dependencies = [
 [[package]]
 name = "embassy-time-driver"
 version = "0.1.0"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 dependencies = [
  "document-features",
 ]
@@ -314,10 +323,12 @@ dependencies = [
 [[package]]
 name = "embassy-time-queue-driver"
 version = "0.1.0"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 
 [[package]]
 name = "embassy-usb-driver"
 version = "0.1.0"
+source = "git+https://github.com/guissalustiano/embassy.git?branch=feat/radio#5af838b8ad743735bd0ef4309b4cffd0c6f423a2"
 dependencies = [
  "defmt",
 ]
@@ -363,9 +374,6 @@ name = "embedded-io"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
-dependencies = [
- "defmt",
-]
 
 [[package]]
 name = "embedded-io-async"
@@ -373,7 +381,6 @@ version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ff09972d4073aa8c299395be75161d582e7629cd663171d62af73c8d50dba3f"
 dependencies = [
- "defmt",
  "embedded-io",
 ]
 
@@ -391,12 +398,6 @@ checksum = "1763775e2323b7d5f0aa6090657f5e21cfa02ede71f5dc40eead06d64dcd15cc"
 dependencies = [
  "embedded-storage",
 ]
-
-[[package]]
-name = "encode_unicode"
-version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
 
 [[package]]
 name = "fixed"
@@ -527,6 +528,12 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 [[package]]
 name = "jewel"
 version = "0.1.0"
+source = "git+https://github.com/guissalustiano/jewel-rs.git?branch=main#bd7ead7f76bfaff583560194fe4f8d1301f23f8a"
+
+[[package]]
+name = "jewel"
+version = "0.1.0"
+source = "git+https://github.com/guissalustiano/jewel-rs.git#bd7ead7f76bfaff583560194fe4f8d1301f23f8a"
 
 [[package]]
 name = "jewel-embassy-nrf52840-examples"
@@ -544,19 +551,12 @@ dependencies = [
  "embedded-hal 1.0.0",
  "embedded-hal-async",
  "embedded-hal-bus",
- "embedded-io",
- "embedded-io-async",
- "embedded-storage",
- "fixed",
  "futures",
- "jewel",
- "microfft",
- "num-integer",
+ "jewel 0.1.0 (git+https://github.com/guissalustiano/jewel-rs.git?branch=main)",
  "panic-probe",
  "rand",
  "serde",
  "static_cell",
- "usbd-hid",
 ]
 
 [[package]]
@@ -564,17 +564,6 @@ name = "litrs"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4ce301924b7887e9d637144fdade93f9dfff9b60981d4ac161db09720d39aa5"
-
-[[package]]
-name = "microfft"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "556b5d8420cb2e761b21eedb5cae7525bf6838144151a3bec546e9969162dadc"
-dependencies = [
- "cfg-if",
- "num-complex",
- "static_assertions",
-]
 
 [[package]]
 name = "nb"
@@ -699,25 +688,6 @@ dependencies = [
  "cortex-m",
  "cortex-m-rt",
  "vcell",
-]
-
-[[package]]
-name = "num-complex"
-version = "0.4.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ba157ca0885411de85d6ca030ba7e2a83a28636056c7c699b07c8b6f7383214"
-dependencies = [
- "num-traits",
-]
-
-[[package]]
-name = "num-integer"
-version = "0.1.45"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "225d3389fb3509a24c93f5c29eb6bde2586b98d9f016636dff58d7c6f7569cd9"
-dependencies = [
- "autocfg",
- "num-traits",
 ]
 
 [[package]]
@@ -859,26 +829,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ssmarshal"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3e6ad23b128192ed337dfa4f1b8099ced0c2bf30d61e551b65fda5916dbb850"
-dependencies = [
- "encode_unicode",
- "serde",
-]
-
-[[package]]
 name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
-
-[[package]]
-name = "static_assertions"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "static_cell"
@@ -948,47 +902,6 @@ name = "unicode-ident"
 version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
-
-[[package]]
-name = "usb-device"
-version = "0.2.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f6cc3adc849b5292b4075fc0d5fdcf2f24866e88e336dd27a8943090a520508"
-
-[[package]]
-name = "usbd-hid"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "975bd411f4a939986751ea09992a24fa47c4d25c6ed108d04b4c2999a4fd0132"
-dependencies = [
- "serde",
- "ssmarshal",
- "usb-device",
- "usbd-hid-macros",
-]
-
-[[package]]
-name = "usbd-hid-descriptors"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcbee8c6735e90894fba04770bc41e11fd3c5256018856e15dc4dd1e6c8a3dd1"
-dependencies = [
- "bitfield",
-]
-
-[[package]]
-name = "usbd-hid-macros"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "261079a9ada015fa1acac7cc73c98559f3a92585e15f508034beccf6a2ab75a2"
-dependencies = [
- "byteorder",
- "proc-macro2",
- "quote",
- "serde",
- "syn 1.0.109",
- "usbd-hid-descriptors",
-]
 
 [[package]]
 name = "vcell"
