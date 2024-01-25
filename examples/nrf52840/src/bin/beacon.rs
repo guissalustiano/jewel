@@ -5,8 +5,10 @@ use defmt::{info, unwrap};
 use embassy_executor::Spawner;
 use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Timer;
-use jewel::adv_pdu::{Address, AddressType, NonConnectableUndirected};
-use jewel::radio::BleRadio;
+use jewel::{
+    adv_pdu::{Address, AddressType, NonConnectableUndirected},
+    radio::BleRadio,
+};
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
