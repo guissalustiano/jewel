@@ -18,6 +18,7 @@
 /// (represented by -)
 ///
 /// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-970b9251-9089-5ea4-1634-41defd816278
+use crate::address::{Address, AddressType};
 
 pub fn parse(bytes: &[u8]) -> Result<NonConnectableUndirected, ParseError> {
     let package = NonConnectableUndirected::parse(bytes);
@@ -26,52 +27,6 @@ pub fn parse(bytes: &[u8]) -> Result<NonConnectableUndirected, ParseError> {
     }
 
     Err(ParseError::InvalidType)
-}
-
-#[derive(Debug, Clone)]
-pub struct Address {
-    // Little endian address
-    address_le: [u8; 6],
-
-    address_type: AddressType,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum AddressType {
-    Public,
-    Random,
-}
-
-impl Address {
-    fn new_le(address_le: [u8; 6], address_type: AddressType) -> Self {
-        Self {
-            address_le,
-            address_type,
-        }
-    }
-
-    // from a big endian address
-    pub fn new_be(address_be: [u8; 6], address_type: AddressType) -> Self {
-        let address_le = [
-            address_be[5],
-            address_be[4],
-            address_be[3],
-            address_be[2],
-            address_be[1],
-            address_be[0],
-        ];
-
-        Self::new_le(address_le, address_type)
-    }
-
-    // Little endian address
-    // ```
-    // let address = Address::new_be([0xff, 0xe1, 0xe8, 0xd0, 0xdc, 0x27], AddressType::Random).bytes()
-    // assert_eq!(address.bytes(), [0x27, 0xdc, 0xd0, 0xe8, 0xe1, 0xff]);
-    // ```
-    pub fn bytes(&self) -> [u8; 6] {
-        self.address_le
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -181,7 +136,7 @@ impl<'a> NonConnectableUndirected<'a> {
         bytes[..2].copy_from_slice(&header.bytes());
 
         // write address
-        bytes[2..8].copy_from_slice(&self.address.bytes());
+        bytes[2..8].copy_from_slice(&self.address.transmission_bytes());
 
         // write data
         bytes[8..(8 + self.data.len())].copy_from_slice(self.data);
@@ -220,4 +175,35 @@ pub enum ParseError {
     InvalidType,
     InvalidLength,
     InvalidHeader,
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    // Exemple generate from
+    #[test]
+    fn hello_word_adv_pdu() {
+        let actual = NonConnectableUndirected {
+            address: Address::new_be([0xff, 0xe1, 0xe8, 0xd0, 0xdc, 0x27], AddressType::Random),
+            data: &[
+                0x02, 0x01, 0x06, // Flags
+                0x03, 0x03, 0x09, 0x18, // Complete list of 16-bit UUIDs available
+                0x0A, 0x09, // Length, Type: Device name
+                b'H', b'e', b'l', b'l', b'o', b'R', b'u', b's', b't',
+            ],
+        };
+
+        let expected = [
+            0x42u8, // ADV_NONCONN_IND, Random address,
+            0x18,   // Length of payload
+            0x27, 0xdc, 0xd0, 0xe8, 0xe1, 0xff, // Adress
+            0x02, 0x01, 0x06, // Flags
+            0x03, 0x03, 0x09, 0x18, // Complete list of 16-bit UUIDs available
+            0x0A, 0x09, // Length, Type: Device name
+            b'H', b'e', b'l', b'l', b'o', b'R', b'u', b's', b't',
+        ];
+
+        assert_eq!(actual.bytes()[..(expected.len())], expected);
+    }
 }

@@ -1,36 +1,34 @@
-use core::future::Future;
-
 use crate::channel::Channel;
 
 /// BLE packet format for the LE Uncoded PHYs
 ///
-///     ┌───────────┬──────────────┬────────┬────────┬────────────────────────┬─────────┬-----------------------┐
-///     │           │              │        │        │                        │         │                       l
-///     │           │              │Flags   │Length  │                        │         │                       l
-///     │           │              │(1 byte)│(1 byte)│  Adv PD                │         │                       l
-///     │           │              │        │        │  (1-255 bytes)         │         │                       l
-///     │           │              ├────────┴────────┤                        │         │                       l
-///     │           │              │ Adv Header (2B) │                        │         │                       l
-///     │           │              ├────────┬────────┼--------┬───────────────┤         │                       l
-///     │           │              │        │        │        │               │         │                       l
-///     │           │              │Flags   │Length  │CREInfo │               │         │                       l
-///     │Preamble   │Access-Address│(1 byte)│(1 byte)│(1 byte)│ Data PDU      │CRC      │Costant tone extension l
-///     │(1-2 bytes)│(4 bytes)     │        │        │        │ (1-255 bytes) │(3 bytes)│(16 to 160 us)         l
-///     │           │              ├────────┴────────┴--------┤               │         │                       l
-///     │           │              │ Data Header (2-3 bytes)  │               │         │                       l
-///     │           │              ├──────────────────────────┴───────────────┤         │                       l
-///     │           │              │                                          │         │                       l
-///     │           │              │  PDU (2-258 bytes)                       │         │                       l
-///     │           │              │                                          │         │                       l
-///     │           │              │                                          │         │                       l
-///     └───────────┴──────────────┴──────────────────────────────────────────┴─────────┴-----------------------┘
-///
-/// The CREInfo and Constant Tone Extension are optional.
-///
-/// The Length field is the length of the PDU, not including the header.
-/// On the nrf52 is used to define how mutch bytes the radio will read from the pointer and send.
-///
-/// Each fild is send with the least significant bit first.
+//     ┌───────────┬──────────────┬────────┬────────┬────────────────────────┬─────────┬-----------------------┐
+//     │           │              │        │        │                        │         │                       l
+//     │           │              │Flags   │Length  │                        │         │                       l
+//     │           │              │(1 byte)│(1 byte)│  Adv PD                │         │                       l
+//     │           │              │        │        │  (1-255 bytes)         │         │                       l
+//     │           │              ├────────┴────────┤                        │         │                       l
+//     │           │              │ Adv Header (2B) │                        │         │                       l
+//     │           │              ├────────┬────────┼--------┬───────────────┤         │                       l
+//     │           │              │        │        │        │               │         │                       l
+//     │           │              │Flags   │Length  │CREInfo │               │         │                       l
+//     │Preamble   │Access-Address│(1 byte)│(1 byte)│(1 byte)│ Data PDU      │CRC      │Costant tone extension l
+//     │(1-2 bytes)│(4 bytes)     │        │        │        │ (1-255 bytes) │(3 bytes)│(16 to 160 us)         l
+//     │           │              ├────────┴────────┴--------┤               │         │                       l
+//     │           │              │ Data Header (2-3 bytes)  │               │         │                       l
+//     │           │              ├──────────────────────────┴───────────────┤         │                       l
+//     │           │              │                                          │         │                       l
+//     │           │              │  PDU (2-258 bytes)                       │         │                       l
+//     │           │              │                                          │         │                       l
+//     │           │              │                                          │         │                       l
+//     └───────────┴──────────────┴──────────────────────────────────────────┴─────────┴-----------------------┘
+//
+// The CREInfo and Constant Tone Extension are optional.
+//
+// The Length field is the length of the PDU, not including the header.
+// On the nrf52 is used to define how mutch bytes the radio will read from the pointer and send.
+//
+// Each fild is send with the least significant bit first.
 
 pub const MAX_PDU_LENGTH: usize = 258;
 
@@ -81,7 +79,7 @@ pub trait BleRadio {
     // Set channel
     ///
     /// The radio must be disabled before calling this function
-    fn set_channel(&mut self, channel: impl Channel);
+    fn set_channel(&mut self, channel: Channel);
 
     /// Set the CRC init value
     ///
@@ -89,6 +87,8 @@ pub trait BleRadio {
     fn set_crc_init(&mut self, crc_init: u32);
 
     /// Set buffer to read/write
+    /// The buffer should exist for the life time of the transmission
+    /// TODO: how can I use ownership to ensure this?
     fn set_buffer(&mut self, buffer: &[u8]) -> Result<(), Self::Error>;
 
     // Set buffer mut

@@ -6,7 +6,8 @@ use embassy_executor::Spawner;
 use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Timer;
 use jewel::{
-    adv_pdu::{Address, AddressType, NonConnectableUndirected},
+    address::{Address, AddressType},
+    adv_pdu::NonConnectableUndirected,
     radio::BleRadio,
 };
 use {defmt_rtt as _, panic_probe as _};

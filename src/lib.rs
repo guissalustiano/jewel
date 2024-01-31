@@ -3,6 +3,7 @@
 pub mod adv_pdu;
 pub mod channel;
 pub mod radio;
+pub mod address;
 
 /// BLE advertising address for 4.* advertising packets
 ///
