@@ -107,7 +107,7 @@ pub struct NonConnectableUndirected<'a> {
 impl<'a> NonConnectableUndirected<'a> {
     pub const TYPE: u8 = 0b0010;
 
-    pub fn bytes(&self) -> [u8; 39] {
+    pub fn transmission_bytes(&self) -> [u8; 39] {
         let mut bytes = [0u8; 39];
 
         // AdvAddr.len() + AdvAddr.len()
@@ -204,6 +204,6 @@ mod test {
             b'H', b'e', b'l', b'l', b'o', b'R', b'u', b's', b't',
         ];
 
-        assert_eq!(actual.bytes()[..(expected.len())], expected);
+        assert_eq!(actual.transmission_bytes()[..(expected.len())], expected);
     }
 }

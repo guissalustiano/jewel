@@ -27,17 +27,19 @@ async fn main(_spawner: Spawner) {
     info!("Starting BLE radio");
     let mut radio = radio::ble::Radio::new(p.RADIO, Irqs);
 
-    let pdu = [
-        0x46u8, // ADV_NONCONN_IND, Random address,
-        0x18,   // Length of payload
-        0x27, 0xdc, 0xd0, 0xe8, 0xe1, 0xff, // Adress
-        0x02, 0x01, 0x06, // Flags
-        0x03, 0x03, 0x09, 0x18, // Complete list of 16-bit UUIDs available
-        0x0A, 0x09, // Length, Type: Device name
-        b'H', b'e', b'l', b'l', b'o', b'R', b'u', b's', b't',
-    ];
+    let pdu = NonConnectableUndirected {
+        address: Address::new_be([0xff, 0xe1, 0xe8, 0xd0, 0xdc, 0x27], AddressType::Random),
+        data: &[
+            0x02, 0x01, 0x06, // Flags
+            0x03, 0x03, 0x09, 0x18, // Complete list of 16-bit UUIDs available
+            0x0A, 0x09, // Length, Type: Device name
+            b'H', b'e', b'l', b'l', b'o', b'R', b'u', b's', b't',
+        ],
+    };
+    let data = pdu.transmission_bytes();
 
-    unwrap!(radio.set_buffer(pdu.as_ref()));
+    info!("{:?}", data);
+    unwrap!(radio.set_buffer(data.as_ref()));
 
     loop {
         info!("Sending packet");
