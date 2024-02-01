@@ -95,6 +95,13 @@ impl<'a> Packet<'_, 1> for Flags {
     }
 }
 
+trait AdvertisingPacket<'a, const N: usize>
+where
+    Self: Packet<'a, N>,
+{
+    fn r#type() -> u8;
+}
+
 /// Advertising Non-Connectable Indication
 /// Used to non-connectable and non-scannable undirected advertising events
 ///
@@ -114,8 +121,10 @@ pub struct NonConnectableUndirected<'a> {
     pub data: &'a [u8],
 }
 
-impl<'a> NonConnectableUndirected<'a> {
-    pub const TYPE: u8 = 0b0010;
+impl<'a> AdvertisingPacket<'a, 39> for NonConnectableUndirected<'a> {
+    fn r#type() -> u8 {
+        0b0010
+    }
 }
 
 impl<'a> Packet<'a, 39> for NonConnectableUndirected<'a> {
@@ -140,7 +149,7 @@ impl<'a> Packet<'a, 39> for NonConnectableUndirected<'a> {
                 tx_add,
                 ch_sel: false,
                 rfu: false,
-                pdu_type: Self::TYPE,
+                pdu_type: Self::r#type(),
             },
             length: payload_len as u8,
         };
@@ -166,7 +175,7 @@ impl<'a> Packet<'a, 39> for NonConnectableUndirected<'a> {
 
         let header = Header::reception_parse(header.try_into().unwrap()).unwrap();
 
-        if header.flags.pdu_type != Self::TYPE {
+        if header.flags.pdu_type != Self::r#type() {
             return Err(ParseError::InvalidType);
         }
 
