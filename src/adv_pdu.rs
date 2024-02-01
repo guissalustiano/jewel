@@ -23,8 +23,8 @@ use crate::{
     radio::Packet,
 };
 
-pub fn parse(bytes: &[u8]) -> Result<NonConnectableUndirected, ParseError> {
-    let package = NonConnectableUndirected::reception_parse(bytes[0..39].try_into().unwrap());
+pub fn parse(bytes: &[u8]) -> Result<NonConnectableIndirected, ParseError> {
+    let package = NonConnectableIndirected::reception_parse(bytes[0..39].try_into().unwrap());
     if package.is_ok() {
         return package;
     }
@@ -116,18 +116,18 @@ where
 ///
 /// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3544231c-d808-9b6f-8f5a-d45c1c467d4e
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct NonConnectableUndirected<'a> {
+pub struct NonConnectableIndirected<'a> {
     pub address: Address,
     pub data: &'a [u8],
 }
 
-impl<'a> AdvertisingPacket<'a, 39> for NonConnectableUndirected<'a> {
+impl<'a> AdvertisingPacket<'a, 39> for NonConnectableIndirected<'a> {
     fn r#type() -> u8 {
         0b0010
     }
 }
 
-impl<'a> Packet<'a, 39> for NonConnectableUndirected<'a> {
+impl<'a> Packet<'a, 39> for NonConnectableIndirected<'a> {
     type Error = ParseError;
     fn transmission_bytes(&self) -> [u8; 39] {
         let mut bytes = [0u8; 39];
@@ -208,7 +208,7 @@ mod test {
     // Exemple generate from
     #[test]
     fn hello_word_adv_pdu() {
-        let actual = NonConnectableUndirected {
+        let actual = NonConnectableIndirected {
             address: Address::new_be([0xff, 0xe1, 0xe8, 0xd0, 0xdc, 0x27], AddressType::Random),
             data: &[
                 0x02, 0x01, 0x06, // Flags
@@ -233,13 +233,13 @@ mod test {
 
     #[test]
     fn non_connectable_bytes_parse_is_complementary() {
-        let packet = NonConnectableUndirected {
+        let packet = NonConnectableIndirected {
             address: Address::new_be([0xff, 0xe1, 0xe8, 0xd0, 0xdc, 0x27], AddressType::Random),
             data: &[0x01, 0x02, 0x03],
         };
 
         let bytes = packet.transmission_bytes();
-        let actual = NonConnectableUndirected::reception_parse(&bytes).unwrap();
+        let actual = NonConnectableIndirected::reception_parse(&bytes).unwrap();
 
         dbg!(&bytes);
 

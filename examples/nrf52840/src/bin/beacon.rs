@@ -7,8 +7,8 @@ use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Timer;
 use jewel::{
     address::{Address, AddressType},
-    adv_pdu::NonConnectableUndirected,
-    radio::BleRadio,
+    adv_pdu::NonConnectableIndirected,
+    radio::{BleRadio, Packet},
 };
 use {defmt_rtt as _, panic_probe as _};
 
@@ -27,7 +27,7 @@ async fn main(_spawner: Spawner) {
     info!("Starting BLE radio");
     let mut radio = radio::ble::Radio::new(p.RADIO, Irqs);
 
-    let pdu = NonConnectableUndirected {
+    let pdu = NonConnectableIndirected {
         address: Address::new_be([0xff, 0xe1, 0xe8, 0xd0, 0xdc, 0x27], AddressType::Random),
         data: &[
             0x02, 0x01, 0x06, // Flags

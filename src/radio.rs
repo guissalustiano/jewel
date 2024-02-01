@@ -103,7 +103,7 @@ pub trait BleRadio {
     async fn receive(&mut self);
 }
 
-pub(crate) trait Packet<'a, const N: usize>
+pub trait Packet<'a, const N: usize>
 where
     Self: Sized,
 {
