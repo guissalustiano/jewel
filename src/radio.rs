@@ -74,7 +74,7 @@ pub trait BleRadio {
     /// Set the acess address, the 4 bytes after the preamble
     ///
     /// The radio must be disabled before calling this function
-    fn set_acess_address(&mut self, access_address: u32);
+    fn set_access_address(&mut self, access_address: u32);
 
     // Set channel
     ///
@@ -101,4 +101,14 @@ pub trait BleRadio {
 
     /// Receive the packaget to the buffer
     async fn receive(&mut self);
+}
+
+pub(crate) trait Packet<'a, const N: usize>
+where
+    Self: Sized,
+{
+    type Error: Sized;
+
+    fn transmission_bytes(&self) -> [u8; N];
+    fn reception_parse(bytes: &'a [u8; N]) -> Result<Self, Self::Error>;
 }

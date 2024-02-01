@@ -18,10 +18,13 @@
 /// (represented by -)
 ///
 /// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-970b9251-9089-5ea4-1634-41defd816278
-use crate::address::{Address, AddressType};
+use crate::{
+    address::{Address, AddressType},
+    radio::Packet,
+};
 
 pub fn parse(bytes: &[u8]) -> Result<NonConnectableUndirected, ParseError> {
-    let package = NonConnectableUndirected::parse(bytes);
+    let package = NonConnectableUndirected::reception_parse(bytes[0..39].try_into().unwrap());
     if package.is_ok() {
         return package;
     }
@@ -35,16 +38,18 @@ struct Header {
     length: u8,
 }
 
-impl Header {
-    fn parse(bytes: [u8; 2]) -> Self {
-        Self {
-            flags: Flags::parse(bytes[0]),
-            length: bytes[1],
-        }
+impl<'a> Packet<'_, 2> for Header {
+    type Error = ();
+
+    fn transmission_bytes(&self) -> [u8; 2] {
+        [self.flags.transmission_bytes()[0], self.length]
     }
 
-    fn bytes(&self) -> [u8; 2] {
-        [self.flags.bytes(), self.length]
+    fn reception_parse(bytes: &[u8; 2]) -> Result<Self, Self::Error> {
+        Ok(Self {
+            flags: Flags::reception_parse(&bytes[0..1].try_into().unwrap())?,
+            length: bytes[1],
+        })
     }
 }
 
@@ -57,19 +62,11 @@ struct Flags {
     pdu_type: u8,
 }
 
-impl Flags {
-    fn parse(byte: u8) -> Self {
-        Self {
-            rx_add: (byte & 0b1000_0000) != 0,
-            tx_add: (byte & 0b0100_0000) != 0,
-            ch_sel: (byte & 0b0010_0000) != 0,
-            rfu: (byte & 0b0001_0000) != 0,
-            pdu_type: byte & 0b0000_1111,
-        }
-    }
+impl<'a> Packet<'_, 1> for Flags {
+    type Error = ();
 
     /// RxAdd | TxAdd | ChSel | RFU | PDU Type
-    fn bytes(&self) -> u8 {
+    fn transmission_bytes(&self) -> [u8; 1] {
         let bool2bit = |b: bool| -> u8 {
             if b {
                 1
@@ -77,12 +74,24 @@ impl Flags {
                 0
             }
         };
-
-        (bool2bit(self.rx_add)) << 7
+        let byte = (bool2bit(self.rx_add)) << 7
             | (bool2bit(self.tx_add)) << 6
             | (bool2bit(self.ch_sel)) << 5
             | (bool2bit(self.rfu)) << 4
-            | (self.pdu_type & 0b1111)
+            | (self.pdu_type & 0b1111);
+
+        [byte]
+    }
+
+    fn reception_parse(bytes: &[u8; 1]) -> Result<Self, Self::Error> {
+        let byte = bytes[0];
+        Ok(Self {
+            rx_add: (byte & 0b1000_0000) != 0,
+            tx_add: (byte & 0b0100_0000) != 0,
+            ch_sel: (byte & 0b0010_0000) != 0,
+            rfu: (byte & 0b0001_0000) != 0,
+            pdu_type: byte & 0b0000_1111,
+        })
     }
 }
 
@@ -99,6 +108,7 @@ impl Flags {
 /// The TxAdd indicate the type of the advertiser address, either public or random.
 ///
 /// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3544231c-d808-9b6f-8f5a-d45c1c467d4e
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NonConnectableUndirected<'a> {
     pub address: Address,
     pub data: &'a [u8],
@@ -106,8 +116,11 @@ pub struct NonConnectableUndirected<'a> {
 
 impl<'a> NonConnectableUndirected<'a> {
     pub const TYPE: u8 = 0b0010;
+}
 
-    pub fn transmission_bytes(&self) -> [u8; 39] {
+impl<'a> Packet<'a, 39> for NonConnectableUndirected<'a> {
+    type Error = ParseError;
+    fn transmission_bytes(&self) -> [u8; 39] {
         let mut bytes = [0u8; 39];
 
         // AdvAddr.len() + AdvAddr.len()
@@ -133,7 +146,7 @@ impl<'a> NonConnectableUndirected<'a> {
         };
 
         // write flags and length
-        bytes[..2].copy_from_slice(&header.bytes());
+        bytes[..2].copy_from_slice(&header.transmission_bytes());
 
         // write address
         bytes[2..8].copy_from_slice(&self.address.transmission_bytes());
@@ -144,19 +157,21 @@ impl<'a> NonConnectableUndirected<'a> {
         bytes
     }
 
-    pub fn parse(bytes: &'a [u8]) -> Result<Self, ParseError> {
+    fn reception_parse(bytes: &'a [u8; 39]) -> Result<Self, Self::Error> {
         if bytes.len() < 8 {
             return Err(ParseError::InvalidLength);
         }
 
-        let header = Header::parse(bytes[0..2].try_into().unwrap());
+        let (header, pdu) = bytes.split_at(2);
+
+        let header = Header::reception_parse(header.try_into().unwrap()).unwrap();
 
         if header.flags.pdu_type != Self::TYPE {
-            return Err(ParseError::InvalidLength);
+            return Err(ParseError::InvalidType);
         }
 
         let address = Address::new_le(
-            bytes[2..8].try_into().unwrap(),
+            pdu[0..6].try_into().unwrap(),
             if header.flags.tx_add {
                 AddressType::Random
             } else {
@@ -164,13 +179,13 @@ impl<'a> NonConnectableUndirected<'a> {
             },
         );
 
-        let data = &bytes[8..(8 + header.length as usize)];
+        let data = &pdu[6..(header.length as usize)];
 
         Ok(Self { address, data })
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy)]
 pub enum ParseError {
     InvalidType,
     InvalidLength,
@@ -205,5 +220,20 @@ mod test {
         ];
 
         assert_eq!(actual.transmission_bytes()[..(expected.len())], expected);
+    }
+
+    #[test]
+    fn non_connectable_bytes_parse_is_complementary() {
+        let packet = NonConnectableUndirected {
+            address: Address::new_be([0xff, 0xe1, 0xe8, 0xd0, 0xdc, 0x27], AddressType::Random),
+            data: &[0x01, 0x02, 0x03],
+        };
+
+        let bytes = packet.transmission_bytes();
+        let actual = NonConnectableUndirected::reception_parse(&bytes).unwrap();
+
+        dbg!(&bytes);
+
+        assert_eq!(packet, actual);
     }
 }
