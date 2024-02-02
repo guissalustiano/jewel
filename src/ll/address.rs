@@ -17,7 +17,7 @@ use defmt::Format;
 pub struct Address {
     // Little endian address
     address_le: [u8; 6],
-    pub(crate) r#type: AddressType,
+    pub r#type: AddressType,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Format)]
@@ -48,9 +48,9 @@ impl Address {
 
     /// Create a new public address from a big endian address
     /// ```
-    /// use jewel::address::Address;
+    /// use jewel::ll::{Address, AddressType};
     /// let address = Address::new_public(0xffe1e8d0dc27);
-    /// assert_eq!(address.is_random(), false);
+    /// assert_eq!(address.r#type, AddressType::Public);
     /// ```
     pub fn new_public(address: u64) -> Self {
         Self::new_le(Self::u64_to_le(address), AddressType::Public)
@@ -58,9 +58,9 @@ impl Address {
 
     /// Create a new random address from a big endian address
     /// ```
-    /// use jewel::address::Address;
+    /// use jewel::ll::{Address, AddressType};
     /// let address = Address::new_random(0xffe1e8d0dc27);
-    /// assert_eq!(address.is_random(), true);
+    /// assert_eq!(address.r#type, AddressType::Random);
     /// ```
     pub fn new_random(address: u64) -> Self {
         Self::new_le(Self::u64_to_le(address), AddressType::Random)
@@ -68,15 +68,11 @@ impl Address {
 
     /// Serizalie the address in little endian address for transmission
     /// ```
-    /// use jewel::address::Address;
+    /// use jewel::ll::Address;
     /// let address = Address::new_random(0xffe1e8d0dc27);
-    /// assert_eq!(address.transmission_bytes(), [0x27, 0xdc, 0xd0, 0xe8, 0xe1, 0xff]);
+    /// assert_eq!(address.bytes(), [0x27, 0xdc, 0xd0, 0xe8, 0xe1, 0xff]);
     /// ```
-    pub fn transmission_bytes(&self) -> [u8; 6] {
+    pub fn bytes(&self) -> [u8; 6] {
         self.address_le
-    }
-
-    pub fn is_random(&self) -> bool {
-        self.r#type == AddressType::Random
     }
 }

@@ -5,7 +5,7 @@ pub trait ChannelTrait {
     /// RF channel center frequency in MHz
     /// https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8d4b6daf-4142-e928-81d1-520529d8277f
     /// ```
-    /// use jewel::channel::{AdvertisingChannel, ChannelTrait};
+    /// use jewel::phy::{AdvertisingChannel, ChannelTrait};
     ///
     /// assert_eq!(AdvertisingChannel::Ch37.central_frequency(), 2402);
     /// assert_eq!(AdvertisingChannel::Ch39.central_frequency(), 2480);
@@ -36,7 +36,7 @@ pub trait ChannelTrait {
     ///
     /// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-c4266341-6cc3-b2d0-3b02-17c240cf2fa4
     /// ```
-    /// use jewel::channel::{DataChannel, ChannelTrait};
+    /// use jewel::phy::{DataChannel, ChannelTrait};
     ///
     /// assert_eq!(DataChannel::Ch23.whitening_init(), 0b0101_0111);
     /// ```

@@ -104,13 +104,3 @@ pub trait BleRadio {
     #[allow(async_fn_in_trait)]
     async fn receive(&mut self);
 }
-
-pub trait Packet<'a, const N: usize>
-where
-    Self: Sized,
-{
-    type Error: Sized;
-
-    fn transmission_bytes(&self) -> [u8; N];
-    fn reception_parse(bytes: &'a [u8; N]) -> Result<Self, Self::Error>;
-}
