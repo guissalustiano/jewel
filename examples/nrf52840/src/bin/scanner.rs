@@ -5,6 +5,7 @@ use defmt::{info, unwrap};
 use embassy_executor::Spawner;
 use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Timer;
+use jewel::adv_pdu::parse;
 use jewel::radio::BleRadio;
 use jewel::radio::MAX_PDU_LENGTH;
 use {defmt_rtt as _, panic_probe as _};
@@ -31,7 +32,11 @@ async fn main(_spawner: Spawner) {
     loop {
         info!("Receiving packet");
         radio.receive().await;
-        info!("Received packet: {:?}", &buffer);
+        if let Ok(packet) = parse(&buffer) {
+            info!("Received packet: {:?}", &packet);
+        } else {
+            info!("Received packet: {:?}", &buffer);
+        }
         Timer::after_millis(500).await;
     }
 }

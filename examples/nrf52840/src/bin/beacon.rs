@@ -6,8 +6,8 @@ use embassy_executor::Spawner;
 use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Timer;
 use jewel::{
-    address::{Address, AddressType},
-    adv_pdu::NonConnectableIndirected,
+    address::Address,
+    adv_pdu::AdvNonconnInd,
     radio::{BleRadio, Packet},
 };
 use {defmt_rtt as _, panic_probe as _};
@@ -27,15 +27,14 @@ async fn main(_spawner: Spawner) {
     info!("Starting BLE radio");
     let mut radio = radio::ble::Radio::new(p.RADIO, Irqs);
 
-    let pdu = NonConnectableIndirected {
-        address: Address::new_be([0xff, 0xe1, 0xe8, 0xd0, 0xdc, 0x27], AddressType::Random),
-        data: &[
-            0x02, 0x01, 0x06, // Flags
-            0x03, 0x03, 0x09, 0x18, // Complete list of 16-bit UUIDs available
-            0x0A, 0x09, // Length, Type: Device name
-            b'H', b'e', b'l', b'l', b'o', b'R', b'u', b's', b't',
-        ],
-    };
+    let body = [
+        0x02, 0x01, 0x06, // Flags
+        0x03, 0x03, 0x09, 0x18, // Complete list of 16-bit UUIDs available
+        0x0A, 0x09, // Length, Type: Device name
+        b'H', b'e', b'l', b'l', b'o', b'R', b'u', b's', b't',
+    ];
+
+    let pdu = AdvNonconnInd::new(Address::new_random(0xffe1e8d0dc27), &body);
     let data = pdu.transmission_bytes();
 
     info!("{:?}", data);

@@ -11,15 +11,16 @@
 /// The comparision of two device addresses includes the device address type
 ///
 /// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3815b05a-b69c-4e3c-5897-c8d3baa4fc30
-#[derive(Debug, Clone, Eq, PartialEq)]
+use defmt::Format;
+
+#[derive(Debug, Clone, Eq, PartialEq, Format)]
 pub struct Address {
     // Little endian address
     address_le: [u8; 6],
-
-    pub(crate) address_type: AddressType,
+    pub(crate) r#type: AddressType,
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Format)]
 pub enum AddressType {
     Public,
     Random,
@@ -30,30 +31,52 @@ impl Address {
     pub(crate) fn new_le(address_le: [u8; 6], address_type: AddressType) -> Self {
         Self {
             address_le,
-            address_type,
+            r#type: address_type,
         }
     }
 
-    /// create an address in big endian array
-    pub fn new_be(address_be: [u8; 6], address_type: AddressType) -> Self {
-        let address_le = [
-            address_be[5],
-            address_be[4],
-            address_be[3],
-            address_be[2],
-            address_be[1],
-            address_be[0],
-        ];
-
-        Self::new_le(address_le, address_type)
+    fn u64_to_le(address: u64) -> [u8; 6] {
+        [
+            (address & 0xff) as u8,
+            ((address >> 8) & 0xff) as u8,
+            ((address >> 16) & 0xff) as u8,
+            ((address >> 24) & 0xff) as u8,
+            ((address >> 32) & 0xff) as u8,
+            ((address >> 40) & 0xff) as u8,
+        ]
     }
 
-    // Serizalie the address in little endian address for transmission
-    // ```
-    // let address = Address::new_be([0xff, 0xe1, 0xe8, 0xd0, 0xdc, 0x27], AddressType::Random).bytes()
-    // assert_eq!(address.bytes(), [0x27, 0xdc, 0xd0, 0xe8, 0xe1, 0xff]);
-    // ```
+    /// Create a new public address from a big endian address
+    /// ```
+    /// use jewel::address::Address;
+    /// let address = Address::new_public(0xffe1e8d0dc27);
+    /// assert_eq!(address.is_random(), false);
+    /// ```
+    pub fn new_public(address: u64) -> Self {
+        Self::new_le(Self::u64_to_le(address), AddressType::Public)
+    }
+
+    /// Create a new random address from a big endian address
+    /// ```
+    /// use jewel::address::Address;
+    /// let address = Address::new_random(0xffe1e8d0dc27);
+    /// assert_eq!(address.is_random(), true);
+    /// ```
+    pub fn new_random(address: u64) -> Self {
+        Self::new_le(Self::u64_to_le(address), AddressType::Random)
+    }
+
+    /// Serizalie the address in little endian address for transmission
+    /// ```
+    /// use jewel::address::Address;
+    /// let address = Address::new_random(0xffe1e8d0dc27);
+    /// assert_eq!(address.transmission_bytes(), [0x27, 0xdc, 0xd0, 0xe8, 0xe1, 0xff]);
+    /// ```
     pub fn transmission_bytes(&self) -> [u8; 6] {
         self.address_le
+    }
+
+    pub fn is_random(&self) -> bool {
+        self.r#type == AddressType::Random
     }
 }
