@@ -7,16 +7,10 @@
 pub use flags::*;
 
 mod flags {
-    use core::fmt;
-
     use defmt::Format;
-    use serde::{
-        de::{self, Visitor},
-        Serialize, Serializer,
-    };
 
     /// Ref: Cap 1.3
-    #[derive(Debug, Clone, Format)]
+    #[derive(Debug, Clone, Format, Copy, PartialEq, Eq)]
     pub struct Flags {
         /// Device operating in LE Limited Discoverable mode.
         ///
@@ -67,39 +61,51 @@ mod flags {
                 simultaneous_le_bredr_capable_controller: false,
             }
         }
-    }
 
-    impl Serialize for Flags {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            serializer.serialize_u8(
-                (self.le_limited_disc as u8)
-                    | (self.le_general_disc as u8) << 1
-                    | (self.br_edr_not_supported as u8) << 2
-                    | (self.simultaneous_le_bredr_capable_controller as u8) << 3,
-            )
+        pub fn byte(&self) -> u8 {
+            (self.le_limited_disc as u8)
+                | (self.le_general_disc as u8) << 1
+                | (self.br_edr_not_supported as u8) << 2
+                | (self.simultaneous_le_bredr_capable_controller as u8) << 3
+        }
+
+        pub fn parse(byte: u8) -> Self {
+            Self {
+                le_limited_disc: byte & 0b0000_0001 != 0,
+                le_general_disc: byte & 0b0000_0010 != 0,
+                br_edr_not_supported: byte & 0b0000_0100 != 0,
+                simultaneous_le_bredr_capable_controller: byte & 0b0000_1000 != 0,
+            }
         }
     }
 
-    impl<'de> Visitor<'de> for Flags {
-        type Value = Flags;
+    #[cfg(test)]
+    mod tests {
+        use super::*;
 
-        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            formatter.write_str("a u8")
+        #[test]
+        fn serialize_flags() {
+            let flags = Flags {
+                le_limited_disc: true,
+                le_general_disc: false,
+                br_edr_not_supported: true,
+                simultaneous_le_bredr_capable_controller: false,
+            };
+
+            assert_eq!(flags.byte(), 0b0000_0101);
         }
 
-        fn visit_u8<E>(self, value: u8) -> Result<Self::Value, E>
-        where
-            E: de::Error,
-        {
-            Ok(Flags {
-                le_limited_disc: (value & 0b0000_0001) != 0,
-                le_general_disc: (value & 0b0000_0010) != 0,
-                br_edr_not_supported: (value & 0b0000_0100) != 0,
-                simultaneous_le_bredr_capable_controller: (value & 0b0000_1000) != 0,
-            })
+        #[test]
+        fn deserialize_flags() {
+            assert_eq!(
+                Flags::parse(0b0000_0101),
+                Flags {
+                    le_limited_disc: true,
+                    le_general_disc: false,
+                    br_edr_not_supported: true,
+                    simultaneous_le_bredr_capable_controller: false,
+                }
+            );
         }
     }
 }
