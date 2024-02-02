@@ -1,5 +1,6 @@
 #![cfg_attr(not(test), no_std)]
 
+pub mod gap;
 pub mod ll;
 pub mod phy;
 
