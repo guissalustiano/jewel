@@ -1,4 +1,4 @@
-use crate::channel::Channel;
+use crate::phy::channel::Channel;
 
 /// BLE packet format for the LE Uncoded PHYs
 ///
@@ -97,9 +97,11 @@ pub trait BleRadio {
     }
 
     /// Transmit the packaget in the  buffer
+    #[allow(async_fn_in_trait)]
     async fn transmit(&mut self);
 
     /// Receive the packaget to the buffer
+    #[allow(async_fn_in_trait)]
     async fn receive(&mut self);
 }
 
