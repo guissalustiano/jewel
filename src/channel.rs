@@ -1,6 +1,6 @@
 pub trait ChannelTrait {
-    fn physical_index(&self) -> u8;
     fn channel_index(&self) -> u8;
+    fn physical_index(&self) -> u8;
 
     /// RF channel center frequency in MHz
     /// https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8d4b6daf-4142-e928-81d1-520529d8277f
@@ -11,7 +11,7 @@ pub trait ChannelTrait {
     /// assert_eq!(AdvertisingChannel::Ch39.central_frequency(), 2480);
     /// ```
     fn central_frequency(&self) -> u16 {
-        2402u16 + (self.channel_index() as u16) * 2u16
+        2402u16 + (self.physical_index() as u16) * 2u16
     }
 
     /// The whitener and de-whitener are defined the same way, using a 7-bit
@@ -41,7 +41,7 @@ pub trait ChannelTrait {
     /// assert_eq!(DataChannel::Ch23.whitening_init(), 0b0101_0111);
     /// ```
     fn whitening_init(&self) -> u8 {
-        0b0100_0000 | self.physical_index()
+        0b0100_0000 | self.channel_index()
     }
 }
 
@@ -190,28 +190,28 @@ pub enum DataChannel {
 }
 
 impl ChannelTrait for Channel {
-    fn physical_index(&self) -> u8 {
-        match self {
-            Channel::Advertising(channel) => channel.physical_index(),
-            Channel::Data(channel) => channel.physical_index(),
-        }
-    }
-
     fn channel_index(&self) -> u8 {
         match self {
             Channel::Advertising(channel) => channel.channel_index(),
             Channel::Data(channel) => channel.channel_index(),
         }
     }
+
+    fn physical_index(&self) -> u8 {
+        match self {
+            Channel::Advertising(channel) => channel.physical_index(),
+            Channel::Data(channel) => channel.physical_index(),
+        }
+    }
 }
 
 impl ChannelTrait for AdvertisingChannel {
     // https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8d4b6daf-4142-e928-81d1-520529d8277f
-    fn physical_index(&self) -> u8 {
+    fn channel_index(&self) -> u8 {
         *self as u8
     }
 
-    fn channel_index(&self) -> u8 {
+    fn physical_index(&self) -> u8 {
         match self {
             AdvertisingChannel::Ch37 => 0,
             AdvertisingChannel::Ch38 => 12,
@@ -221,11 +221,11 @@ impl ChannelTrait for AdvertisingChannel {
 }
 
 impl ChannelTrait for DataChannel {
-    fn physical_index(&self) -> u8 {
+    fn channel_index(&self) -> u8 {
         *self as u8
     }
 
-    fn channel_index(&self) -> u8 {
+    fn physical_index(&self) -> u8 {
         match self {
             // AdvertisingChannel::Ch37 => 0,
             DataChannel::Ch0 => 1,
@@ -314,7 +314,7 @@ impl TryFrom<u8> for AdvertisingChannel {
 impl TryFrom<u8> for DataChannel {
     type Error = ();
 
-    /// From physical index
+    /// From channel index
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(Self::Ch0),
