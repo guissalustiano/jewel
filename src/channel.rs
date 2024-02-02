@@ -38,11 +38,10 @@ pub trait ChannelTrait {
     /// ```
     /// use jewel::channel::{DataChannel, ChannelTrait};
     ///
-    /// // channel index 23 == physical index 21
-    /// assert_eq!(DataChannel::Ch21.whitening_init(), 0b0101_0111);
+    /// assert_eq!(DataChannel::Ch23.whitening_init(), 0b0101_0111);
     /// ```
     fn whitening_init(&self) -> u8 {
-        0b0100_0000 | self.channel_index()
+        0b0100_0000 | self.physical_index()
     }
 }
 
@@ -410,9 +409,9 @@ mod test {
 
     #[test]
     fn test_whitening_init() {
-        assert_eq!(AdvertisingChannel::Ch37.whitening_init(), 0b0100_0000);
-        assert_eq!(DataChannel::Ch0.whitening_init(), 0b0100_0001);
-        assert_eq!(AdvertisingChannel::Ch38.whitening_init(), 0b0100_1100);
+        assert_eq!(DataChannel::Ch0.whitening_init(), 0b0100_0000);
+        assert_eq!(AdvertisingChannel::Ch37.whitening_init(), 0b0110_0101);
+        assert_eq!(AdvertisingChannel::Ch38.whitening_init(), 0b0110_0110);
         assert_eq!(AdvertisingChannel::Ch39.whitening_init(), 0b0110_0111);
     }
 }
