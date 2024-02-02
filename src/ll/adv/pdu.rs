@@ -234,7 +234,7 @@ mod direct_ind {
             }
         }
 
-        fn bytes(&self) -> [u8; 14] {
+        pub fn bytes(&self) -> [u8; 14] {
             let mut bytes = [0u8; 14];
             let header = Header::with_rxtx(
                 self.adv_address.r#type,
@@ -363,7 +363,7 @@ mod nonconn_ind {
             }
         }
 
-        fn bytes(&self) -> [u8; 39] {
+        pub fn bytes(&self) -> [u8; 39] {
             let mut bytes = [0u8; 39];
 
             assert!(self.adv_data.len() <= 37);
@@ -485,7 +485,7 @@ mod scan_ind {
             }
         }
 
-        fn bytes(&self) -> [u8; 39] {
+        pub fn bytes(&self) -> [u8; 39] {
             let mut bytes = [0u8; 39];
 
             assert!(self.adv_data.len() <= 37);
@@ -611,7 +611,7 @@ mod scan_req {
             }
         }
 
-        fn bytes(&self) -> [u8; 14] {
+        pub fn bytes(&self) -> [u8; 14] {
             let mut bytes = [0u8; 14];
             let header = Header::with_rxtx(
                 self.scan_address.r#type,
@@ -735,7 +735,7 @@ mod scan_rsp {
             }
         }
 
-        fn bytes(&self) -> [u8; 39] {
+        pub fn bytes(&self) -> [u8; 39] {
             let mut bytes = [0u8; 39];
 
             assert!(self.adv_data.len() <= 37);

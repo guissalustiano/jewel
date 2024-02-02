@@ -23,7 +23,7 @@ First implement the Bluetooth 4.2, then 5.X, Mesh
         - [ ] AUX_SYNC_SUBEVENT_RSP
     - [ ] Scan PDUs
         - [X] SCAN_REQ
-        - [ ] SCAN_RSP
+        - [X] SCAN_RSP
         - [ ] AUX_SCAN_REQ
         - [ ] AUX_SCAN_RSP
     - [ ] Initiating PDUs
@@ -34,9 +34,30 @@ First implement the Bluetooth 4.2, then 5.X, Mesh
     - [ ] Timing
     - [ ] Device filtering
 - [ ] L2CP
-- [ ] GATT/ATT
+- [ ] GAP
     - [ ] Adv structure
-    - [ ] GATT server
-    - [ ] GATT client
+        - [ ] Service UUID
+        - [ ] Local name
+        - [X] Flags
+        - [ ] Manufacture Specific Data
+        - [ ] TX Power Level
+        - [ ] Secure Simple Pairing Out of Banc
+        - [ ] Secure Simple Pairing Out of Band
+        - [ ] Security Manager TK Value
+        - [ ] Peripheral Connection Interval Range
+        - [ ] Service Solicitation
+        - [ ] Service Data
+        - [ ] Appearance
+        - [ ] Public Target Address
+        - [ ] Random Target Address
+        - [ ] Advertising Interval
+        - [ ] LE Bluetooth Device Address
+        - [ ] LE Role
+        - [ ] Uniform Resource Identifier (URI)
+        - [ ] LE Supported Features
+        - [ ] Channel Map Update Indication
+        - [ ] BIGInfo
+        - [ ] Broadcast_Code
+- [ ] GATT
 - [ ] Multiple state machine suport
 - [ ] Mesh

@@ -40,6 +40,8 @@ mod flags {
 
     // Based in rubble implementation https://github.com/jonas-schievink/rubble/blob/f475c20e213fcd0a957521951bea3c3892699640/rubble/src/link/ad_structure.rs#L264-L309
     impl Flags {
+        pub const AD_TYPE: u8 = 0x01;
+
         /// Returns flags suitable for discoverable devices that want to establish a connection.
         ///
         /// The created `Flags` value specifies that this device is not BR/EDR (classic Bluetooth)

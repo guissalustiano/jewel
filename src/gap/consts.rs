@@ -3,10 +3,6 @@
 //! Ref: https://www.bluetooth.com/specifications/assigned-numbers/
 
 pub mod ad_types {
-    /// Flags
-    /// Core Specification Supplement, Part A, Section 1.3
-    const FLAGS: u8 = 0x01;
-
     /// Incomplete List of 16-bit Service Class UUIDs
     /// Core Specification Supplement, Part A, Section 1.1
     const INCOMPLETE_LIST_OF_16_BIT_SERVICE_CLASS_UUIDS: u8 = 0x02;
