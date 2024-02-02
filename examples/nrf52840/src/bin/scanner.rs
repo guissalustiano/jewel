@@ -5,17 +5,14 @@ use defmt::{info, unwrap};
 use embassy_executor::Spawner;
 use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Timer;
-use jewel::adv_pdu::parse;
-use jewel::radio::BleRadio;
-use jewel::radio::MAX_PDU_LENGTH;
+use jewel::ll::parse;
+use jewel::phy::{BleRadio, MAX_PDU_LENGTH};
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
     RADIO => radio::InterruptHandler<peripherals::RADIO>;
 });
 
-// Same payload as the embassy/nrf-softdevice ble_advertising example,
-// but just in channel 39.
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
     let mut config = embassy_nrf::config::Config::default();
