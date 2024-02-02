@@ -28,7 +28,7 @@ pub enum AdvPdu<'a> {
     ScanRsp(ScanRsp<'a>) = ScanRsp::TYPE,
 }
 
-pub fn parse<'a>(bytes: &'a [u8]) -> Result<AdvPdu<'a>, ParseError> {
+pub fn parse(bytes: &[u8]) -> Result<AdvPdu<'_>, ParseError> {
     if let Ok(packet) = bytes[0..14]
         .try_into()
         .map_err(|_| ParseError::InvalidType)
