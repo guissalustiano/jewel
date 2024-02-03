@@ -6,8 +6,9 @@ use embassy_executor::Spawner;
 use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Timer;
 use jewel::{
+    gap::{AdvData, Flags},
     ll::{Address, AdvNonconnInd},
-    phy::BleRadio,
+    phy::{BleRadio, MAX_PDU_LENGTH},
 };
 use {defmt_rtt as _, panic_probe as _};
 
@@ -26,14 +27,17 @@ async fn main(_spawner: Spawner) {
     info!("Starting BLE radio");
     let mut radio = radio::ble::Radio::new(p.RADIO, Irqs);
 
-    let body = [
-        0x02, 0x01, 0x06, // Flags
-        0x03, 0x03, 0x09, 0x18, // Complete list of 16-bit UUIDs available
-        0x0A, 0x09, // Length, Type: Device name
-        b'H', b'e', b'l', b'l', b'o', b'R', b'u', b's', b't',
-    ];
+    let body = AdvData::empty()
+        .set_flags(Flags::discoverable())
+        .set_uuids16(&[0x0918])
+        .set_complete_local_name("HelloRust");
 
-    let pdu = AdvNonconnInd::new(Address::new_random(0xffe1e8d0dc27), &body);
+    let mut body_buffer = [0u8; MAX_PDU_LENGTH];
+    let len = body.bytes(&mut body_buffer);
+
+    let pdu = AdvNonconnInd::new(Address::new_random(0xffe1e8d0dc27), &body_buffer[..len]);
+
+    // assign to a variable to keep the buffer existing until the transmission
     let data = pdu.bytes();
 
     info!("{:?}", data);
