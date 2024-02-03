@@ -36,8 +36,8 @@ First implement the Bluetooth 4.2, then 5.X, Mesh
 - [ ] L2CP
 - [ ] GAP
     - [ ] Adv structure
-        - [ ] Service UUID
-        - [ ] Local name
+        - [X] Service UUID
+        - [X] Local name
         - [X] Flags
         - [ ] Manufacture Specific Data
         - [ ] TX Power Level
@@ -61,3 +61,4 @@ First implement the Bluetooth 4.2, then 5.X, Mesh
 - [ ] GATT
 - [ ] Multiple state machine suport
 - [ ] Mesh
+- [ ] Serde support
