@@ -5,11 +5,80 @@
 //! The AD type identifier values are defined in [Assigned Numbers](https://www.bluetooth.com/specifications/assigned-numbers/).
 //! The AD type data formats and meanings are defined in Section 1 of the Part A of the [Core Specification Supplementi](https://www.bluetooth.com/specifications/specs/core-specification-supplement-10/)
 pub use flags::*;
+pub use local_name::*;
 
+/// Cap 1.2 in Section 1.3 of the Core Specification Supplement
+mod local_name {
+    struct ShortenedLocalName<'a> {
+        name: &'a str,
+    }
+
+    impl<'a> ShortenedLocalName<'a> {
+        pub const AD_TYPE: u8 = 0x08;
+
+        pub fn bytes(&self) -> &[u8] {
+            self.name.as_bytes()
+        }
+
+        pub fn parse(bytes: &'a [u8]) -> Self {
+            Self {
+                name: core::str::from_utf8(bytes).unwrap(),
+            }
+        }
+    }
+
+    struct CompleteLocalName<'a> {
+        name: &'a str,
+    }
+
+    impl<'a> CompleteLocalName<'a> {
+        pub const AD_TYPE: u8 = 0x09;
+
+        pub fn bytes(&self) -> &[u8] {
+            self.name.as_bytes()
+        }
+
+        pub fn parse(bytes: &'a [u8]) -> Self {
+            Self {
+                name: core::str::from_utf8(bytes).unwrap(),
+            }
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn serialize_shortened_local_name() {
+            let name = ShortenedLocalName { name: "test" };
+            assert_eq!(name.bytes(), b"test");
+        }
+
+        #[test]
+        fn deserialize_shortened_local_name() {
+            let name = ShortenedLocalName::parse(b"test");
+            assert_eq!(name.name, "test");
+        }
+
+        #[test]
+        fn serialize_complete_local_name() {
+            let name = CompleteLocalName { name: "test" };
+            assert_eq!(name.bytes(), b"test");
+        }
+
+        #[test]
+        fn deserialize_complete_local_name() {
+            let name = CompleteLocalName::parse(b"test");
+            assert_eq!(name.name, "test");
+        }
+    }
+}
+
+/// Cap 1.3 in Section 1.3 of the Core Specification Supplement
 mod flags {
     use defmt::Format;
 
-    /// Ref: Cap 1.3
     #[derive(Debug, Clone, Format, Copy, PartialEq, Eq)]
     pub struct Flags {
         /// Device operating in LE Limited Discoverable mode.
