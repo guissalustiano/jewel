@@ -1,34 +1,35 @@
-use crate::phy::channel::Channel;
+//! BLE packet format for the LE Uncoded PHYs
 
-/// BLE packet format for the LE Uncoded PHYs
-///
-//     ┌───────────┬──────────────┬────────┬────────┬────────────────────────┬─────────┬-----------------------┐
-//     │           │              │        │        │                        │         │                       l
-//     │           │              │Flags   │Length  │                        │         │                       l
-//     │           │              │(1 byte)│(1 byte)│  Adv PD                │         │                       l
-//     │           │              │        │        │  (1-255 bytes)         │         │                       l
-//     │           │              ├────────┴────────┤                        │         │                       l
-//     │           │              │ Adv Header (2B) │                        │         │                       l
-//     │           │              ├────────┬────────┼--------┬───────────────┤         │                       l
-//     │           │              │        │        │        │               │         │                       l
-//     │           │              │Flags   │Length  │CREInfo │               │         │                       l
-//     │Preamble   │Access-Address│(1 byte)│(1 byte)│(1 byte)│ Data PDU      │CRC      │Costant tone extension l
-//     │(1-2 bytes)│(4 bytes)     │        │        │        │ (1-255 bytes) │(3 bytes)│(16 to 160 us)         l
-//     │           │              ├────────┴────────┴--------┤               │         │                       l
-//     │           │              │ Data Header (2-3 bytes)  │               │         │                       l
-//     │           │              ├──────────────────────────┴───────────────┤         │                       l
-//     │           │              │                                          │         │                       l
-//     │           │              │  PDU (2-258 bytes)                       │         │                       l
-//     │           │              │                                          │         │                       l
-//     │           │              │                                          │         │                       l
-//     └───────────┴──────────────┴──────────────────────────────────────────┴─────────┴-----------------------┘
 //
-// The CREInfo and Constant Tone Extension are optional.
+//    ┌───────────┬──────────────┬────────┬────────┬────────────────────────┬─────────┬-----------------------┐
+//    │           │              │        │        │                        │         │                       l
+//    │           │              │Flags   │Length  │                        │         │                       l
+//    │           │              │(1 byte)│(1 byte)│  Adv PD                │         │                       l
+//    │           │              │        │        │  (1-255 bytes)         │         │                       l
+//    │           │              ├────────┴────────┤                        │         │                       l
+//    │           │              │ Adv Header (2B) │                        │         │                       l
+//    │           │              ├────────┬────────┼--------┬───────────────┤         │                       l
+//    │           │              │        │        │        │               │         │                       l
+//    │           │              │Flags   │Length  │CREInfo │               │         │                       l
+//    │Preamble   │Access-Address│(1 byte)│(1 byte)│(1 byte)│ Data PDU      │CRC      │Costant tone extension l
+//    │(1-2 bytes)│(4 bytes)     │        │        │        │ (1-255 bytes) │(3 bytes)│(16 to 160 us)         l
+//    │           │              ├────────┴────────┴--------┤               │         │                       l
+//    │           │              │ Data Header (2-3 bytes)  │               │         │                       l
+//    │           │              ├──────────────────────────┴───────────────┤         │                       l
+//    │           │              │                                          │         │                       l
+//    │           │              │  PDU (2-258 bytes)                       │         │                       l
+//    │           │              │                                          │         │                       l
+//    │           │              │                                          │         │                       l
+//    └───────────┴──────────────┴──────────────────────────────────────────┴─────────┴-----------------------┘
 //
-// The Length field is the length of the PDU, not including the header.
-// On the nrf52 is used to define how mutch bytes the radio will read from the pointer and send.
+//The CREInfo and Constant Tone Extension are optional.
 //
-// Each fild is send with the least significant bit first.
+//The Length field is the length of the PDU, not including the header.
+//On the nrf52 is used to define how mutch bytes the radio will read from the pointer and send.
+//
+//Each fild is send with the least significant bit first.
+
+use crate::phy::channel::Channel;
 
 pub const MAX_PDU_LENGTH: usize = 258;
 
@@ -53,7 +54,7 @@ pub enum HeaderSize {
 }
 
 /// I only know enough about nrf52, so this is a interface specific for it for now, but must be generalized later.
-pub trait BleRadio {
+pub trait BleRadio<'b> {
     type Error;
     /// Set the radio mode and respective preamble length
     ///
@@ -88,11 +89,12 @@ pub trait BleRadio {
 
     /// Set buffer to read/write
     /// The buffer should exist for the life time of the transmission
-    /// TODO: how can I use ownership to ensure this?
-    fn set_buffer(&mut self, buffer: &[u8]) -> Result<(), Self::Error>;
+    ///
+    /// The buffer should live for the life time of the transmission/reception
+    fn set_buffer(&mut self, buffer: &'b [u8]) -> Result<(), Self::Error>;
 
     // Set buffer mut
-    fn set_buffer_mut(&mut self, buffer: &mut [u8]) -> Result<(), Self::Error> {
+    fn set_buffer_mut(&mut self, buffer: &'b mut [u8]) -> Result<(), Self::Error> {
         self.set_buffer(buffer)
     }
 

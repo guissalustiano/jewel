@@ -7,7 +7,7 @@ use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Timer;
 use jewel::{
     gap::{AdvData, Flags},
-    ll::{Address, AdvNonconnInd},
+    ll::{Address, AddressAndData, AdvNonconnInd},
     phy::{BleRadio, MAX_PDU_LENGTH},
 };
 use {defmt_rtt as _, panic_probe as _};
@@ -37,11 +37,10 @@ async fn main(_spawner: Spawner) {
 
     let pdu = AdvNonconnInd::new(Address::new_random(0xffe1e8d0dc27), &body_buffer[..len]);
 
-    // assign to a variable to keep the buffer existing until the transmission
-    let data = pdu.bytes();
+    let mut pdu_buffer = [0u8; MAX_PDU_LENGTH];
+    pdu.bytes(&mut pdu_buffer);
 
-    info!("{:?}", data);
-    unwrap!(radio.set_buffer(data.as_ref()));
+    unwrap!(radio.set_buffer(&pdu_buffer));
 
     loop {
         info!("Sending packet");

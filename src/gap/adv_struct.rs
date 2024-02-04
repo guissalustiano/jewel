@@ -327,9 +327,9 @@ mod local_name {
     }
 
     #[derive(Debug, Clone, Format, PartialEq, Eq)]
-    pub(crate) struct LocalName<'a> {
-        pub(crate) name: &'a [u8],
-        pub(crate) r#type: LocalNameType,
+    pub struct LocalName<'a> {
+        pub name: &'a [u8],
+        pub r#type: LocalNameType,
     }
 
     impl<'a> LocalName<'a> {
