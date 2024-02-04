@@ -8,7 +8,7 @@ use embassy_time::Timer;
 use jewel::{
     gap::{AdvData, Flags},
     ll::{Address, AddressAndData, AdvNonconnInd},
-    phy::{BleRadio, MAX_PDU_LENGTH},
+    phy::{AdvertisingChannel, BleRadio, MAX_PDU_LENGTH},
 };
 use {defmt_rtt as _, panic_probe as _};
 
@@ -41,6 +41,7 @@ async fn main(_spawner: Spawner) {
     pdu.bytes(&mut pdu_buffer);
 
     unwrap!(radio.set_buffer(&pdu_buffer));
+    radio.set_channel(AdvertisingChannel::Ch38.into());
 
     loop {
         info!("Sending packet");

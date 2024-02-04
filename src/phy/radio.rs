@@ -54,7 +54,7 @@ pub enum HeaderSize {
 }
 
 /// I only know enough about nrf52, so this is a interface specific for it for now, but must be generalized later.
-pub trait BleRadio<'b> {
+pub trait BleRadio {
     type Error;
     /// Set the radio mode and respective preamble length
     ///
@@ -88,21 +88,23 @@ pub trait BleRadio<'b> {
     fn set_crc_init(&mut self, crc_init: u32);
 
     /// Set buffer to read/write
-    /// The buffer should exist for the life time of the transmission
-    ///
-    /// The buffer should live for the life time of the transmission/reception
-    fn set_buffer(&mut self, buffer: &'b [u8]) -> Result<(), Self::Error>;
+    /// This method is unsound because no guarantee that the buffer will live for the life time of the transmission
+    fn set_buffer(&mut self, buffer: &[u8]) -> Result<(), Self::Error>;
 
     // Set buffer mut
-    fn set_buffer_mut(&mut self, buffer: &'b mut [u8]) -> Result<(), Self::Error> {
+    fn set_buffer_mut(&mut self, buffer: &mut [u8]) -> Result<(), Self::Error> {
         self.set_buffer(buffer)
     }
 
     /// Transmit the packaget in the  buffer
+    ///
+    /// The buffer should be set and live for the life time of the transmission
     #[allow(async_fn_in_trait)]
     async fn transmit(&mut self);
 
     /// Receive the packaget to the buffer
+    ///
+    /// The buffer should be set and live for the life time of the transmission
     #[allow(async_fn_in_trait)]
     async fn receive(&mut self);
 }
