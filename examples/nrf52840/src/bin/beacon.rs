@@ -41,11 +41,19 @@ async fn main(_spawner: Spawner) {
     pdu.bytes(&mut pdu_buffer);
 
     unwrap!(radio.set_buffer(&pdu_buffer));
-    radio.set_channel(AdvertisingChannel::Ch38.into());
 
     loop {
         info!("Sending packet");
+
+        radio.set_channel(AdvertisingChannel::Ch37.into());
         radio.transmit().await;
-        Timer::after_millis(500).await;
+
+        radio.set_channel(AdvertisingChannel::Ch38.into());
+        radio.transmit().await;
+
+        radio.set_channel(AdvertisingChannel::Ch39.into());
+        radio.transmit().await;
+
+        Timer::after_millis(100).await;
     }
 }
