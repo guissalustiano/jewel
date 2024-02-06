@@ -83,7 +83,7 @@ mod uuid {
 
     pub type Uuid16 = u16;
     pub type Uuid32 = u32;
-    pub use uuid::Uuid as Uuid128;
+    pub type Uuid128 = u128;
 
     pub trait Uuid
     where
@@ -190,14 +190,14 @@ mod uuid {
         const COMPLETE_AD_TYPE: u8 = 0x07;
 
         fn bytes(&self, dest: &mut [u8]) -> usize {
-            dest.copy_from_slice(self.as_bytes());
+            dest.copy_from_slice(&self.to_be_bytes());
             size_of::<Self>()
         }
 
         fn parse(bytes: &[u8]) -> Self {
             let mut data = [0; 16];
             data.copy_from_slice(bytes);
-            Self::from_bytes(data)
+            Self::from_be_bytes(data)
         }
     }
 
