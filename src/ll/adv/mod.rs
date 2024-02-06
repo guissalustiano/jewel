@@ -17,7 +17,7 @@
 //! given PDU then they shall be considered reserved for future use.
 //! (represented by -)
 //!
-//! Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-970b9251-9089-5ea4-1634-41defd816278
+//! Ref: [Core 6.B.2.3](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-970b9251-9089-5ea4-1634-41defd816278)
 
 mod header;
 mod pdu;

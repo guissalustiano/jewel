@@ -1,9 +1,14 @@
+//! RF channels
+//!
+//! Ref: [Core 6.B.1.4](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3abb4023-1a31-b4db-cb9d-a70064cb40a0)
+
+/// Utility trait for RF channels
 pub trait ChannelTrait {
     fn channel_index(&self) -> u8;
     fn physical_index(&self) -> u8;
 
     /// RF channel center frequency in MHz
-    /// https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8d4b6daf-4142-e928-81d1-520529d8277f
+    /// Ref: [Core 6.B.1.4](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3abb4023-1a31-b4db-cb9d-a70064cb40a0)
     /// ```
     /// use jewel::phy::{AdvertisingChannel, ChannelTrait};
     ///
@@ -34,7 +39,7 @@ pub trait ChannelTrait {
     /// Position 6 = 1
     ///  (0b101_0111)
     ///
-    /// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-c4266341-6cc3-b2d0-3b02-17c240cf2fa4
+    /// Ref: [Core 6.B.3.2](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-c4266341-6cc3-b2d0-3b02-17c240cf2fa4)
     /// ```
     /// use jewel::phy::{DataChannel, ChannelTrait};
     ///
@@ -45,10 +50,8 @@ pub trait ChannelTrait {
     }
 }
 
-/// 39 RG channels, separated by Advertising channels (Primary Advertising)
+/// 39 RF channels, separated by Advertising channels (Primary Advertising)
 /// and Data channels (General Purpose)
-///
-/// https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3abb4023-1a31-b4db-cb9d-a70064cb40a0
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Channel {
     Advertising(AdvertisingChannel),
@@ -56,8 +59,6 @@ pub enum Channel {
 }
 
 /// 3 of the 39 RF channels used for initial advertising and all legacy advertising activitie.
-///
-/// https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3abb4023-1a31-b4db-cb9d-a70064cb40a0
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum AdvertisingChannel {
@@ -72,8 +73,6 @@ pub enum AdvertisingChannel {
 }
 
 /// 36 of the 39 RF channels used for initial advertising and all legacy advertising activitie.
-///
-/// https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3abb4023-1a31-b4db-cb9d-a70064cb40a0
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum DataChannel {

@@ -1,6 +1,6 @@
 //! Advertising and Scan Response data format
 //!
-//! Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host/generic-access-profile.html#UUID-c2a0b759-8ef4-7055-c13b-17c083691361
+//! Ref: [Core 3.C.11](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host/generic-access-profile.html#UUID-c2a0b759-8ef4-7055-c13b-17c083691361)
 //!
 //! The AD type identifier values are defined in [Assigned Numbers](https://www.bluetooth.com/specifications/assigned-numbers/).
 //! The AD type data formats and meanings are defined in Section 1 of the Part A of the [Core Specification Supplementi](https://www.bluetooth.com/specifications/specs/core-specification-supplement-10/)
@@ -48,10 +48,20 @@ impl<'a> AdvData<'a> {
         self.uuids16 = Some(List(uuids));
         self
     }
+
+    pub fn set_uuids32(mut self, uuids: &'a [Uuid32]) -> Self {
+        self.uuids32 = Some(List(uuids));
+        self
+    }
+
+    pub fn set_uuids128(mut self, uuids: &'a [Uuid128]) -> Self {
+        self.uuids128 = Some(List(uuids));
+        self
+    }
 }
 
 impl<'a> AdvData<'a> {
-    pub fn bytes(&self, dest: &mut [u8]) -> usize {
+    pub(crate) fn bytes(&self, dest: &mut [u8]) -> usize {
         let mut start = 0;
         if let Some(flags) = &self.flags {
             start += 1;
@@ -415,7 +425,7 @@ mod local_name {
 mod flags {
     use defmt::Format;
 
-    #[derive(Debug, Clone, Format, Copy, PartialEq, Eq)]
+    #[derive(Debug, Clone, Format, PartialEq, Eq)]
     pub struct Flags {
         /// Device operating in LE Limited Discoverable mode.
         ///
@@ -483,7 +493,7 @@ mod flags {
                 | (self.simultaneous_le_bredr_capable_controller as u8) << 3
         }
 
-        pub fn bytes(&self, dest: &mut [u8]) -> usize {
+        pub(crate) fn bytes(&self, dest: &mut [u8]) -> usize {
             dest[0] = Self::AD_TYPE;
             dest[1] = self.byte();
             2
@@ -498,7 +508,7 @@ mod flags {
             }
         }
 
-        pub fn parse(bytes: &[u8]) -> Self {
+        pub(crate) fn parse(bytes: &[u8]) -> Self {
             assert_eq!(bytes[0], Self::AD_TYPE);
             Self::parse_byte(bytes[1])
         }

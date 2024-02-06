@@ -1,4 +1,4 @@
-//! Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8909a735-7143-2804-ce68-c535a4fc011d
+//! Ref: [Core 6.B.2.3.1](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8909a735-7143-2804-ce68-c535a4fc011d)
 
 use crate::ll::Address;
 use defmt::Format;

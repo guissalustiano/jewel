@@ -1,5 +1,4 @@
 //! BLE packet format for the LE Uncoded PHYs
-
 //
 //    ┌───────────┬──────────────┬────────┬────────┬────────────────────────┬─────────┬-----------------------┐
 //    │           │              │        │        │                        │         │                       l
@@ -22,19 +21,19 @@
 //    │           │              │                                          │         │                       l
 //    └───────────┴──────────────┴──────────────────────────────────────────┴─────────┴-----------------------┘
 //
-//The CREInfo and Constant Tone Extension are optional.
+// The CREInfo and Constant Tone Extension are optional.
 //
-//The Length field is the length of the PDU, not including the header.
-//On the nrf52 is used to define how mutch bytes the radio will read from the pointer and send.
+// The Length field is the length of the PDU, not including the header.
+// On the nrf52 is used to define how mutch bytes the radio will read from the pointer and send.
 //
-//Each fild is send with the least significant bit first.
+// Each fild is send with the least significant bit first.
 
 use crate::phy::channel::Channel;
 
+/// Maximum PDU length
 pub const MAX_PDU_LENGTH: usize = 258;
 
-// For BLE the CRC polynomial is
-// `x^24 + x^10 + x^9 + x^6 + x^4 + x^3 + x + 1`
+/// For BLE the CRC polynomial is `x^24 + x^10 + x^9 + x^6 + x^4 + x^3 + x + 1`
 pub const CRC_POLY: u32 = 0b00000001_00000000_00000110_01011011;
 
 /// BLE PHY
@@ -42,18 +41,21 @@ pub const CRC_POLY: u32 = 0b00000001_00000000_00000110_01011011;
 pub enum Mode {
     #[doc = "1 Mbit/s BLE with 1 byte preamble"]
     Ble1mbit,
-    #[doc = "2 Mbit/s BLE with 2 byte preamble"]
-    Ble2mbit,
+    // TODO: Add support for other PHYs
+    //#[doc = "2 Mbit/s BLE with 2 byte preamble"]
+    //Ble2mbit,
 }
 
-/// Data Physical Channel PDU header could require and extra byte to the CTEInfo.
-/// This byte cannot be used in the payload because change their size.
+/// Represents the size of the header
+// Data Physical Channel PDU header could require and extra byte to the CTEInfo.
+// This byte cannot be used in the payload because change their size.
 pub enum HeaderSize {
     TwoBytes,
     ThreeBytes,
 }
 
-/// I only know enough about nrf52, so this is a interface specific for it for now, but must be generalized later.
+/// Radio trait
+// I only know enough about nrf52, so this is a interface specific for it for now, but must be generalized later.
 pub trait Radio {
     type Error;
     /// Set the radio mode and respective preamble length
@@ -96,8 +98,6 @@ pub trait Radio {
         self.set_buffer(buffer)
     }
 
-    // TODO: Hardware Link Layer device filtering (6.20.10 Device address match)
-
     /// Transmit the packaget in the  buffer
     ///
     /// The buffer should be set and live for the life time of the transmission
@@ -109,4 +109,6 @@ pub trait Radio {
     /// The buffer should be set and live for the life time of the transmission
     #[allow(async_fn_in_trait)]
     async fn receive(&mut self);
+
+    // TODO: Hardware Link Layer device filtering (6.20.10 Device address match)
 }
