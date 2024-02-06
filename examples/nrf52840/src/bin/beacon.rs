@@ -1,14 +1,14 @@
 #![no_std]
 #![no_main]
 
-use defmt::{info, unwrap};
+use defmt::info;
 use embassy_executor::Spawner;
 use embassy_nrf::{bind_interrupts, peripherals, radio};
-use embassy_time::Timer;
+use embassy_time::Duration;
 use jewel::{
-    gap::{AdvData, Flags},
-    ll::{Address, AddressAndData, AdvNonconnInd},
-    phy::{AdvertisingChannel, BleRadio, MAX_PDU_LENGTH},
+    gap::{AdvData, Broadcaster, Flags},
+    ll::Address,
+    phy::MAX_PDU_LENGTH,
 };
 use {defmt_rtt as _, panic_probe as _};
 
@@ -24,36 +24,25 @@ async fn main(_spawner: Spawner) {
     config.hfclk_source = embassy_nrf::config::HfclkSource::ExternalXtal;
     let p = embassy_nrf::init(config);
 
+    // I don't know how not to depend on the buffer allocation at the beginning
+    let mut buffer = [0u8; MAX_PDU_LENGTH];
+
     info!("Starting BLE radio");
     let mut radio = radio::ble::Radio::new(p.RADIO, Irqs);
-
-    let body = AdvData::empty()
-        .set_flags(Flags::discoverable())
-        .set_uuids16(&[0x0918])
-        .set_complete_local_name("HelloRust");
-
-    let mut body_buffer = [0u8; MAX_PDU_LENGTH];
-    let len = body.bytes(&mut body_buffer);
-
-    let pdu = AdvNonconnInd::new(Address::new_random(0xffe1e8d0dc27), &body_buffer[..len]);
-
-    let mut pdu_buffer = [0u8; MAX_PDU_LENGTH];
-    pdu.bytes(&mut pdu_buffer);
-
-    unwrap!(radio.set_buffer(&pdu_buffer));
+    let mut broadcaster = Broadcaster::new(
+        &mut radio,
+        Duration::from_millis(300),
+        Address::new_random(0xffe1e8d0dc27),
+        AdvData::empty()
+            .set_flags(Flags::discoverable())
+            .set_uuids16(&[0x0918])
+            .set_complete_local_name("HelloRust"),
+        &mut buffer,
+    )
+    .unwrap();
 
     loop {
         info!("Sending packet");
-
-        radio.set_channel(AdvertisingChannel::Ch37.into());
-        radio.transmit().await;
-
-        radio.set_channel(AdvertisingChannel::Ch38.into());
-        radio.transmit().await;
-
-        radio.set_channel(AdvertisingChannel::Ch39.into());
-        radio.transmit().await;
-
-        Timer::after_millis(100).await;
+        broadcaster.transmit().await;
     }
 }

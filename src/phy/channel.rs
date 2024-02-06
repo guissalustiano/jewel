@@ -205,6 +205,12 @@ impl ChannelTrait for Channel {
     }
 }
 
+impl AdvertisingChannel {
+    pub fn channels() -> impl Iterator<Item = Self> {
+        [Self::Ch37, Self::Ch38, Self::Ch39].iter().copied()
+    }
+}
+
 impl ChannelTrait for AdvertisingChannel {
     // https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8d4b6daf-4142-e928-81d1-520529d8277f
     fn channel_index(&self) -> u8 {
