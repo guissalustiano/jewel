@@ -54,7 +54,7 @@ pub enum HeaderSize {
 }
 
 /// I only know enough about nrf52, so this is a interface specific for it for now, but must be generalized later.
-pub trait BleRadio {
+pub trait Radio {
     type Error;
     /// Set the radio mode and respective preamble length
     ///

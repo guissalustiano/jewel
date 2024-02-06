@@ -5,11 +5,7 @@ use defmt::info;
 use embassy_executor::Spawner;
 use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Duration;
-use jewel::{
-    gap::{AdvData, Broadcaster, Flags},
-    ll::Address,
-    phy::MAX_PDU_LENGTH,
-};
+use jewel::{phy::MAX_PDU_LENGTH, Address, AdvData, Broadcaster, Flags};
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {

@@ -9,7 +9,7 @@ use embassy_time::{Duration, Instant, Timer};
 
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 
-use crate::phy::{AdvertisingChannel, BleRadio};
+use crate::phy::{AdvertisingChannel, Radio};
 
 ///  Inter Frame Space
 ///  The time interval between two consecutive packets on the same channel index
@@ -58,12 +58,12 @@ const RANGE_DELAY: Duration = Duration::from_nanos(2 * PROPAGATION_DISTANCE * 4)
 // Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-fed93539-5fa3-b4de-4789-1b8a1b48fa13
 
 // pattern from https://hoverbear.org/blog/rust-state-machine-pattern/
-pub struct LinkLayer<'r, R: BleRadio, S = Standby> {
+pub struct LinkLayer<'r, R: Radio, S = Standby> {
     radio: &'r mut R,
     state: S,
 }
 
-impl<'r, R: BleRadio> LinkLayer<'r, R, Standby> {
+impl<'r, R: Radio> LinkLayer<'r, R, Standby> {
     pub fn new(radio: &'r mut R) -> Self {
         LinkLayer::<R> {
             radio,
@@ -72,7 +72,7 @@ impl<'r, R: BleRadio> LinkLayer<'r, R, Standby> {
     }
 }
 
-impl<'r, R: BleRadio> LinkLayer<'r, R, Standby> {
+impl<'r, R: Radio> LinkLayer<'r, R, Standby> {
     pub fn advertise<'a>(
         self,
         interval: Duration,
@@ -91,7 +91,7 @@ impl<'r, R: BleRadio> LinkLayer<'r, R, Standby> {
     }
 }
 
-impl<'r, R: BleRadio, RNG: Rng> LinkLayer<'r, R, Advertising<'_, RNG>> {
+impl<'r, R: Radio, RNG: Rng> LinkLayer<'r, R, Advertising<'_, RNG>> {
     /// Transmit the advertising data on all advertising channels
     /// You should call this method in a loop to keep advertising with at max the interal time
     pub async fn transmit(&mut self) {

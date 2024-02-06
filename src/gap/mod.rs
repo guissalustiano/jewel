@@ -6,14 +6,14 @@ use rand::rngs::SmallRng;
 
 use crate::{
     ll::{Address, AddressAndData, AdvNonconnInd, Advertising, LinkLayer},
-    phy::{BleRadio, MAX_PDU_LENGTH},
+    phy::{Radio, MAX_PDU_LENGTH},
 };
 
-pub struct Broadcaster<'r, 'a, R: BleRadio> {
+pub struct Broadcaster<'r, 'a, R: Radio> {
     ll: LinkLayer<'r, R, Advertising<'a, SmallRng>>,
 }
 
-impl<'r, 'a, R: BleRadio> Broadcaster<'r, 'a, R> {
+impl<'r, 'a, R: Radio> Broadcaster<'r, 'a, R> {
     pub fn new(
         radio: &'r mut R,
         interval: Duration,
