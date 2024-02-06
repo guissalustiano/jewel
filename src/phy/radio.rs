@@ -96,6 +96,8 @@ pub trait BleRadio {
         self.set_buffer(buffer)
     }
 
+    // TODO: Hardware Link Layer device filtering (6.20.10 Device address match)
+
     /// Transmit the packaget in the  buffer
     ///
     /// The buffer should be set and live for the life time of the transmission
