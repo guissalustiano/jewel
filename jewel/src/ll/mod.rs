@@ -9,7 +9,8 @@ use embassy_time::{Duration, Instant, Timer};
 
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 
-use crate::phy::{AdvertisingChannel, Radio};
+use crate::phy::Mode::Ble1mbit;
+use crate::phy::{AdvertisingChannel, HeaderSize, Radio, ADV_ADDRESS, ADV_CRC_INIT, CRC_POLY};
 
 ///  Inter Frame Space
 ///  The time interval between two consecutive packets on the same channel index
@@ -82,6 +83,11 @@ impl<'r, R: Radio> LinkLayer<'r, R, Standby> {
     ) -> Result<LinkLayer<'r, R, Advertising<'a, SmallRng>>, R::Error> {
         let rng = SmallRng::seed_from_u64(42);
 
+        self.radio.set_mode(Ble1mbit);
+        self.radio.set_tx_power(0);
+        self.radio.set_header_size(HeaderSize::TwoBytes);
+        self.radio.set_access_address(ADV_ADDRESS);
+        self.radio.set_crc_init(ADV_CRC_INIT);
         self.radio.set_buffer(data)?;
 
         Ok(LinkLayer {
@@ -95,7 +101,7 @@ impl<'r, R: Radio, RNG: Rng> LinkLayer<'r, R, Advertising<'_, RNG>> {
     /// Transmit the advertising data on all advertising channels
     /// You should call this method in a loop to keep advertising with at max the interal time
     pub async fn transmit(&mut self) {
-        Timer::at(self.state.event.into()).await;
+        Timer::at(self.state.event).await;
         self.state.event = self.state.next_event();
 
         for channel in AdvertisingChannel::channels() {

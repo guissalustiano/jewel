@@ -1,0 +1,17 @@
+[package]
+name = "jewel-nrf52840"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+jewel = { path = "../jewel" }
+embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy.git", rev = "refs/pull/2351/head", features = [
+    "defmt",
+    "nrf52840",
+    "time-driver-rtc1",
+    "time",
+] }
+
+
+[patch.crates-io]
+embassy-time = { version = "0.3.0", git = "https://github.com/embassy-rs/embassy.git", rev = "refs/pull/2351/head" }

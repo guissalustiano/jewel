@@ -6,6 +6,7 @@ use embassy_executor::Spawner;
 use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Duration;
 use jewel::{phy::MAX_PDU_LENGTH, Address, AdvData, Broadcaster, Flags};
+use jewel_nrf52840::RadioImpl;
 use {defmt_rtt as _, panic_probe as _};
 
 bind_interrupts!(struct Irqs {
@@ -21,7 +22,7 @@ async fn main(_spawner: Spawner) {
     let mut buffer = [0u8; MAX_PDU_LENGTH];
 
     info!("Starting BLE radio");
-    let mut radio = radio::ble::Radio::new(p.RADIO, Irqs);
+    let mut radio: RadioImpl<'_, _> = radio::ble::Radio::new(p.RADIO, Irqs).into();
     let mut broadcaster = Broadcaster::new(
         &mut radio,
         Duration::from_millis(300),
