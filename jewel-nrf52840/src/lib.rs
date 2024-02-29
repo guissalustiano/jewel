@@ -74,15 +74,15 @@ impl<'d, T: Instance> Radio for RadioImpl<'d, T> {
         self.radio.set_crc_init(crc_init)
     }
 
-    fn set_buffer(&mut self, buffer: &[u8]) -> Result<(), Self::Error> {
-        self.radio.set_buffer(buffer)
+    fn set_crc_poly(&mut self, crc_poly: u32) {
+        self.radio.set_crc_poly(crc_poly)
     }
 
-    async fn transmit(&mut self) {
-        self.radio.transmit().await
+    async fn transmit(&mut self, buffer: &[u8]) -> Result<(), Self::Error> {
+        self.radio.transmit(buffer).await
     }
 
-    async fn receive(&mut self) {
-        self.radio.receive().await
+    async fn receive(&mut self, buffer: &mut [u8]) -> Result<(), Self::Error> {
+        self.radio.receive(buffer).await
     }
 }

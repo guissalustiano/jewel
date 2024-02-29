@@ -1,8 +1,6 @@
 mod address;
 mod adv;
 
-use core::marker::PhantomData;
-
 pub use address::*;
 pub use adv::*;
 use embassy_time::{Duration, Instant, Timer};
@@ -80,7 +78,7 @@ impl<'r, R: Radio> LinkLayer<'r, R, Standby> {
 
         // needs to alive for the lifetime of the advertising
         data: &'a [u8],
-    ) -> Result<LinkLayer<'r, R, Advertising<'a, SmallRng>>, R::Error> {
+    ) -> LinkLayer<'r, R, Advertising<'a, SmallRng>> {
         let rng = SmallRng::seed_from_u64(42);
 
         self.radio.set_mode(Ble1mbit);
@@ -88,26 +86,28 @@ impl<'r, R: Radio> LinkLayer<'r, R, Standby> {
         self.radio.set_header_size(HeaderSize::TwoBytes);
         self.radio.set_access_address(ADV_ADDRESS);
         self.radio.set_crc_init(ADV_CRC_INIT);
-        self.radio.set_buffer(data)?;
+        self.radio.set_crc_poly(CRC_POLY);
 
-        Ok(LinkLayer {
+        LinkLayer {
             radio: self.radio,
-            state: Advertising::<'a>::new(rng, interval),
-        })
+            state: Advertising::<'a>::new(rng, interval, data),
+        }
     }
 }
 
 impl<'r, R: Radio, RNG: Rng> LinkLayer<'r, R, Advertising<'_, RNG>> {
     /// Transmit the advertising data on all advertising channels
     /// You should call this method in a loop to keep advertising with at max the interal time
-    pub async fn transmit(&mut self) {
+    pub async fn transmit(&mut self) -> Result<(), R::Error> {
         Timer::at(self.state.event).await;
         self.state.event = self.state.next_event();
 
         for channel in AdvertisingChannel::channels() {
             self.radio.set_channel(channel.into());
-            self.radio.transmit().await
+            self.radio.transmit(&self.state.data).await?;
         }
+
+        Ok(())
     }
 }
 
@@ -123,11 +123,11 @@ pub struct Advertising<'a, RNG: Rng> {
 
     event: Instant,
 
-    _data: PhantomData<&'a [u8]>,
+    data: &'a [u8],
 }
 
 impl<'a, RNG: Rng> Advertising<'a, RNG> {
-    pub fn new(rng: RNG, interval: Duration) -> Self {
+    pub fn new(rng: RNG, interval: Duration, data: &'a [u8]) -> Self {
         assert!(interval >= Duration::from_micros(20_000));
         assert!(interval <= Duration::from_micros(10_485_759_375));
 
@@ -136,7 +136,7 @@ impl<'a, RNG: Rng> Advertising<'a, RNG> {
             rng,
             interval,
             event: Instant::now(),
-            _data: PhantomData,
+            data,
         }
     }
 

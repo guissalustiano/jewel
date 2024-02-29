@@ -37,6 +37,6 @@ async fn main(_spawner: Spawner) {
 
     loop {
         info!("Sending packet");
-        broadcaster.transmit().await;
+        broadcaster.transmit().await.unwrap();
     }
 }

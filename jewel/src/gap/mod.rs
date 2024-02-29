@@ -80,7 +80,7 @@ impl<'r, 'a, R: Radio> Broadcaster<'r, 'a, R> {
         let ll = LinkLayer::new(radio);
 
         // FIXME: it should be a better way to do this
-        let ll = ll.advertise(interval, buffer)?;
+        let ll = ll.advertise(interval, buffer);
 
         Ok(Broadcaster {
             ll,
@@ -90,7 +90,7 @@ impl<'r, 'a, R: Radio> Broadcaster<'r, 'a, R> {
 
     /// Transmit the packet respecting the given interval
     /// You should call this method before the interval time
-    pub async fn transmit(&mut self) {
-        self.ll.transmit().await;
+    pub async fn transmit(&mut self) -> Result<(), R::Error> {
+        self.ll.transmit().await
     }
 }

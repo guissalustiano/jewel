@@ -10,8 +10,8 @@
 //    │           │              ├────────┬────────┼--------┬───────────────┤         │                       l
 //    │           │              │        │        │        │               │         │                       l
 //    │           │              │Flags   │Length  │CREInfo │               │         │                       l
-//    │Preamble   │Access-Address│(1 byte)│(1 byte)│(1 byte)│ Data PDU      │CRC      │Costant tone extension l
-//    │(1-2 bytes)│(4 bytes)     │        │        │        │ (1-255 bytes) │(3 bytes)│(16 to 160 us)         l
+//    │Preamble   │Access-Address│(1 byte)│(1 byte)│[1 byte]│ Data PDU      │CRC      │Costant tone extension l
+//    │(1-2 bytes)│(4 bytes)     │        │        │        │ (1-255 bytes) │(3 bytes)│[16 to 160 us]         l
 //    │           │              ├────────┴────────┴--------┤               │         │                       l
 //    │           │              │ Data Header (2-3 bytes)  │               │         │                       l
 //    │           │              ├──────────────────────────┴───────────────┤         │                       l
@@ -55,60 +55,44 @@ pub enum HeaderSize {
 }
 
 /// Radio trait
-// I only know enough about nrf52, so this is a interface specific for it for now, but must be generalized later.
+// It is specific for it for now, but must be generalized later.
 pub trait Radio {
     type Error;
     /// Set the radio mode and respective preamble length
-    ///
-    /// The radio must be disabled before calling this function
     fn set_mode(&mut self, mode: Mode);
 
     /// Set the radio tx power
     /// round to the nearest supported value and clamp the value outside the support range
-    ///
-    /// The radio must be disabled before calling this function
     fn set_tx_power(&mut self, power_db: i8);
 
     /// Set the header size, 2 or 3 bytes
-    ///
-    /// The radio must be disabled before calling this function
     fn set_header_size(&mut self, header_size: HeaderSize);
 
     /// Set the acess address, the 4 bytes after the preamble
-    ///
-    /// The radio must be disabled before calling this function
     fn set_access_address(&mut self, access_address: u32);
 
     // Set channel
-    ///
-    /// The radio must be disabled before calling this function
     fn set_channel(&mut self, channel: Channel);
 
+    /// Set the CRC polynomial
+    fn set_crc_poly(&mut self, crc_poly: u32);
+
     /// Set the CRC init value
-    ///
-    /// The radio must be disabled before calling this function
     fn set_crc_init(&mut self, crc_init: u32);
-
-    /// Set buffer to read/write
-    /// This method is unsound because no guarantee that the buffer will live for the life time of the transmission
-    fn set_buffer(&mut self, buffer: &[u8]) -> Result<(), Self::Error>;
-
-    // Set buffer mut
-    fn set_buffer_mut(&mut self, buffer: &mut [u8]) -> Result<(), Self::Error> {
-        self.set_buffer(buffer)
-    }
 
     /// Transmit the packaget in the  buffer
     ///
-    /// The buffer should be set and live for the life time of the transmission
+    /// If the lengh field in the buffer is greather them the buffer size,
+    /// the radio will transmit data out of the buffer memory
     #[allow(async_fn_in_trait)]
-    async fn transmit(&mut self);
+    async fn transmit(&mut self, buffer: &[u8]) -> Result<(), Self::Error>;
 
     /// Receive the packaget to the buffer
     ///
-    /// The buffer should be set and live for the life time of the transmission
+    /// If the lengh of receive package is smaller them the buffer
+    /// the radio will write out of the bounderies of the radio
     #[allow(async_fn_in_trait)]
-    async fn receive(&mut self);
+    async fn receive(&mut self, buffer: &mut [u8]) -> Result<(), Self::Error>;
 
     // TODO: Hardware Link Layer device filtering (6.20.10 Device address match)
 }
