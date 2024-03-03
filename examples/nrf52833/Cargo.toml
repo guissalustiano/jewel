@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "jewel-embassy-nrf52840-examples"
+name = "jewel-embassy-nrf52833-examples"
 version = "0.1.0"
 license = "MIT OR Apache-2.0"
 
@@ -29,7 +29,7 @@ embassy-time = { version = "0.3.0", git = "https://github.com/blueluna/embassy.g
 ] }
 embassy-nrf = { version = "0.1.0", git = "https://github.com/blueluna/embassy.git", branch = "feat/radio-ieee802154", features = [
     "defmt",
-    "nrf52840",
+    "nrf52833",
     "time-driver-rtc1",
     "gpiote",
     "unstable-pac",
@@ -55,7 +55,7 @@ embedded-hal = { version = "1.0" }
 embedded-hal-async = { version = "1.0" }
 embedded-hal-bus = { version = "0.1", features = ["async"] }
 jewel = { version = "0.1", path = "../../jewel" }
-jewel-nrf = { version = "0.1", path = "../../jewel-nrf", features = ["nrf52840"] }
+jewel-nrf = { version = "0.1", path = "../../jewel-nrf", features = ["nrf52833"] }
 
 [patch.crates-io]
 embassy-time = { version = "0.3.0", git = "https://github.com/blueluna/embassy.git", branch = "feat/radio-ieee802154" }
