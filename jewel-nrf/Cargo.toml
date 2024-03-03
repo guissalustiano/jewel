@@ -5,14 +5,11 @@ edition = "2021"
 
 [dependencies]
 jewel = { path = "../jewel" }
-embassy-nrf = { version = "0.1.0", git = "https://github.com/blueluna/embassy.git", branch = "feat/radio-ieee802154", features = [
+embassy-nrf = { version = "0.1.0", features = [
     "defmt",
     "time-driver-rtc1",
     "time",
 ] }
-
-[patch.crates-io]
-embassy-time = { version = "0.3.0", git = "https://github.com/blueluna/embassy.git", branch = "feat/radio-ieee802154" }
 
 [features]
 nrf52840 = ["embassy-nrf/nrf52840"]
