@@ -70,8 +70,7 @@ dependencies = [
 [[package]]
 name = "embassy-time"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9c844070d9f80dc66ee739299183312baee2e1cdeb6e90b4ea2af44f4676da5"
+source = "git+https://github.com/embassy-rs/embassy?branch=main#3638df789e4f498b9058bbeb27bdddab4a80bd49"
 dependencies = [
  "cfg-if",
  "critical-section",
@@ -89,8 +88,7 @@ dependencies = [
 [[package]]
 name = "embassy-time-driver"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e0c214077aaa9206958b16411c157961fb7990d4ea628120a78d1a5a28aed24"
+source = "git+https://github.com/embassy-rs/embassy?branch=main#3638df789e4f498b9058bbeb27bdddab4a80bd49"
 dependencies = [
  "document-features",
 ]
@@ -98,8 +96,7 @@ dependencies = [
 [[package]]
 name = "embassy-time-queue-driver"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1177859559ebf42cd24ae7ba8fe6ee707489b01d0bf471f8827b7b12dcb0bc0"
+source = "git+https://github.com/embassy-rs/embassy?branch=main#3638df789e4f498b9058bbeb27bdddab4a80bd49"
 
 [[package]]
 name = "embedded-hal"
@@ -332,3 +329,18 @@ name = "void"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
+
+[[patch.unused]]
+name = "embassy-executor"
+version = "0.5.0"
+source = "git+https://github.com/embassy-rs/embassy?branch=main#3638df789e4f498b9058bbeb27bdddab4a80bd49"
+
+[[patch.unused]]
+name = "embassy-futures"
+version = "0.1.1"
+source = "git+https://github.com/embassy-rs/embassy?branch=main#3638df789e4f498b9058bbeb27bdddab4a80bd49"
+
+[[patch.unused]]
+name = "embassy-nrf"
+version = "0.1.0"
+source = "git+https://github.com/embassy-rs/embassy?branch=main#3638df789e4f498b9058bbeb27bdddab4a80bd49"

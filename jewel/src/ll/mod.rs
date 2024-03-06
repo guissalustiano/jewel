@@ -132,6 +132,7 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
 
             // while waiting for the next advertising event
             // we can receive scan requests
+            // FIXME: it is always scanning in the same channel
             let _ = with_deadline(timer.next_event(), self.receive_scan()).await;
         }
     }

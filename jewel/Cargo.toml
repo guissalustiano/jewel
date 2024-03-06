@@ -17,3 +17,9 @@ embassy-time = { version = "0.3.0",  default-features = false, features = [
     "defmt",
 ] }
 rand = { version = "0.8.5", default-features = false, features = ["small_rng"] }
+
+[patch.crates-io]
+embassy-executor = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+embassy-futures = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+embassy-nrf = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+embassy-time = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
