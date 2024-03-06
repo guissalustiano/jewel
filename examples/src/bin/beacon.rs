@@ -25,15 +25,25 @@ async fn main(_spawner: Spawner) {
     let adv_data = AdvData::empty()
         .set_flags(Flags::discoverable())
         .set_uuids16(&[0x0918])
-        .set_complete_local_name("HelloRust");
+        .set_shortened_local_name("Hello");
 
-    let mut buffer = [0u8; MAX_PDU_LENGTH];
-    let len = adv_data.bytes(&mut buffer);
-    let buffer = &buffer[..len];
+    let mut adv_data_buffer = [0u8; MAX_PDU_LENGTH];
+    let len = adv_data.bytes(&mut adv_data_buffer);
+    let adv_data_buffer = &adv_data_buffer[..len];
+
+    let scan_data = AdvData::empty().set_complete_local_name("HelloRust");
+
+    let mut scan_data_buffer = [0u8; MAX_PDU_LENGTH];
+    let len = scan_data.bytes(&mut scan_data_buffer);
+    let scan_data_buffer = &scan_data_buffer[..len];
 
     let ll = LinkLayer::new(&mut radio);
 
-    ll.adv_nonconnectable_nonscannable_undirected(Duration::from_millis(300), buffer)
-        .await
-        .unwrap();
+    ll.adv_nonconnectable_scannable_undirected(
+        Duration::from_millis(300),
+        adv_data_buffer,
+        scan_data_buffer,
+    )
+    .await
+    .unwrap();
 }

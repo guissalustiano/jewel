@@ -118,6 +118,7 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
 
         let addr = self.radio.device_address();
         let data_pdu = AdvNonconnInd::new(addr, adv_data);
+        //let data_pdu = AdvScanInd::new(addr, adv_data);
 
         let mut data_pdu_buffer = [0u8; MAX_PDU_LENGTH];
         data_pdu.bytes(&mut data_pdu_buffer);

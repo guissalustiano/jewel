@@ -46,6 +46,14 @@ impl<'a> AdvData<'a> {
         self
     }
 
+    pub fn set_shortened_local_name(mut self, local_name: &'a str) -> Self {
+        self.local_name = Some(LocalName {
+            name: local_name.as_bytes(),
+            r#type: LocalNameType::Shortened,
+        });
+        self
+    }
+
     pub fn set_uuids16(mut self, uuids: &'a [Uuid16]) -> Self {
         self.uuids16 = Some(List(uuids));
         self
