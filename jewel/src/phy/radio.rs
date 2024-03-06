@@ -28,7 +28,7 @@
 //
 // Each fild is send with the least significant bit first.
 
-use crate::phy::channel::Channel;
+use crate::{phy::channel::Channel, Address};
 
 /// Maximum PDU length
 pub const MAX_PDU_LENGTH: usize = 258;
@@ -93,6 +93,8 @@ pub trait Radio {
     /// the radio will write out of the bounderies of the radio
     #[allow(async_fn_in_trait)]
     async fn receive(&mut self, buffer: &mut [u8]) -> Result<(), Self::Error>;
+
+    fn device_address(&self) -> Address;
 
     // TODO: Hardware Link Layer device filtering (6.20.10 Device address match)
 }

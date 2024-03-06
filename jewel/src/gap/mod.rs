@@ -66,14 +66,14 @@ impl<'r, 'a, R: Radio> Broadcaster<'r, 'a, R> {
     pub fn new(
         radio: &'r mut R,
         interval: Duration,
-        address: Address,
         data: AdvData<'a>,
         buffer: &'a mut [u8; MAX_PDU_LENGTH],
     ) -> Result<Broadcaster<'r, 'a, R>, R::Error> {
         let mut body_buffer = [0u8; MAX_PDU_LENGTH];
         let len = data.bytes(&mut body_buffer);
 
-        let pdu = AdvNonconnInd::new(address, &body_buffer[..len]);
+        let addr = radio.device_address();
+        let pdu = AdvNonconnInd::new(addr, &body_buffer[..len]);
 
         pdu.bytes(buffer);
 

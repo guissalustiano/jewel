@@ -1,10 +1,15 @@
 #![no_std]
 
+use core::mem;
+
 use embassy_nrf::radio::{
     ble::{Error, Mode, Radio as NrfRadio, TxPower},
     Instance,
 };
-use jewel::phy::{ChannelTrait, Radio, CRC_POLY};
+use jewel::{
+    phy::{ChannelTrait, Radio, CRC_POLY},
+    Address,
+};
 
 pub struct RadioImpl<'d, T: Instance> {
     radio: NrfRadio<'d, T>,
@@ -84,5 +89,18 @@ impl<'d, T: Instance> Radio for RadioImpl<'d, T> {
 
     async fn receive(&mut self, buffer: &mut [u8]) -> Result<(), Self::Error> {
         self.radio.receive(buffer).await
+    }
+
+    fn device_address(&self) -> Address {
+        let ficr: embassy_nrf::pac::FICR = unsafe { mem::transmute(()) };
+        let device_address_public = ficr.deviceaddrtype.read().deviceaddrtype().is_public();
+        let device_address = u64::from(ficr.deviceaddr[0].read().bits())
+            | u64::from(ficr.deviceaddr[1].read().bits());
+
+        if device_address_public {
+            Address::new_public(device_address)
+        } else {
+            Address::new_random(device_address)
+        }
     }
 }
