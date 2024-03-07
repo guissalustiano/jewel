@@ -2,6 +2,8 @@
 //!
 //! Ref: [Core 6.B.1.4](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3abb4023-1a31-b4db-cb9d-a70064cb40a0)
 
+use defmt::Format;
+
 /// Utility trait for RF channels
 pub trait ChannelTrait {
     fn channel_index(&self) -> u8;
@@ -52,14 +54,14 @@ pub trait ChannelTrait {
 
 /// 39 RF channels, separated by Advertising channels (Primary Advertising)
 /// and Data channels (General Purpose)
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Format)]
 pub enum Channel {
     Advertising(AdvertisingChannel),
     Data(DataChannel),
 }
 
 /// 3 of the 39 RF channels used for initial advertising and all legacy advertising activitie.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Format)]
 #[repr(u8)]
 pub enum AdvertisingChannel {
     #[doc = "Channel 37"]
@@ -73,7 +75,7 @@ pub enum AdvertisingChannel {
 }
 
 /// 36 of the 39 RF channels used for initial advertising and all legacy advertising activitie.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Format)]
 #[repr(u8)]
 pub enum DataChannel {
     #[doc = "Channel 0"]

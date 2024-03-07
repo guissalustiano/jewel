@@ -3,7 +3,7 @@ mod adv;
 
 pub use address::*;
 pub use adv::*;
-use defmt::trace;
+use defmt::{info, trace};
 use embassy_time::{with_deadline, Duration, Instant, Timer};
 
 use rand::{rngs::SmallRng, Rng, SeedableRng};
@@ -56,6 +56,10 @@ const PROPAGATION_DISTANCE: u64 = 10; // meters
 /// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-e16c5296-3b60-01b4-3251-a8f289f1cdb2
 const RANGE_DELAY: Duration = Duration::from_nanos(2 * PROPAGATION_DISTANCE * 4);
 
+// The max time between the beginning of two consecutive ADV_*_IND PDUs within an advertising event shall be less than or equal to 10 ms.
+// The advertising event shall be closed within the advertising interval.
+const T_MAX_BETWEEN_ADV_PACKAGE: Duration = Duration::from_millis(10);
+
 // TODO: Implement Window widening
 // Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-fed93539-5fa3-b4de-4789-1b8a1b48fa13
 
@@ -78,15 +82,7 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
         self.radio.set_crc_poly(CRC_POLY);
     }
 
-    async fn transmit_adv(&mut self, pdu: &[u8]) -> Result<(), R::Error> {
-        for channel in AdvertisingChannel::channels() {
-            self.radio.set_channel(channel.into());
-            self.radio.transmit(pdu).await?;
-        }
-
-        Ok(())
-    }
-
+    // Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-1df0df6f-ddb7-150f-e816-e9258645b1eb
     pub async fn adv_nonconnectable_nonscannable_undirected<'a>(
         mut self,
         interval: Duration,
@@ -105,9 +101,21 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
         data_pdu.bytes(&mut data_pdu_buffer);
 
         loop {
-            Timer::at(timer.next_event()).await;
+            // The advertising event shall be closed within the advertising interval.
+            // FIXME: if the interval is too short, it will not send in all channels
+            let _ = with_deadline(timer.next_event(), async {
+                //Timer::at(timer.next_event()).await;
 
-            self.transmit_adv(&data_pdu_buffer).await?;
+                // The spec does not specify any delay between packets in non-scannable undirected advertising
+                for channel in AdvertisingChannel::channels() {
+                    self.radio.set_channel(channel.into());
+                    // TODO: check error
+                    let _ = self.radio.transmit(&data_pdu_buffer).await;
+
+                    Timer::after(T_MAX_BETWEEN_ADV_PACKAGE).await;
+                }
+            })
+            .await;
         }
     }
 
@@ -134,19 +142,27 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
         let mut scan_rsp_buffer = [0u8; MAX_PDU_LENGTH];
         scan_rsp.bytes(&mut scan_rsp_buffer);
 
-        Timer::at(timer.next_event()).await;
         loop {
-            self.transmit_adv(&data_pdu_buffer).await?;
+            // The advertising event shall be closed within the advertising interval.
+            let _ = with_deadline(timer.next_event(), async {
+                for channel in AdvertisingChannel::channels() {
+                    self.radio.set_channel(channel.into());
+                    info!("ble:transmit channel {:?}", channel);
 
-            // while waiting for the next advertising event
-            // we can receive scan requests
-            // TODO: check how long to wait for the scan requests
-            // FIXME: it is always scanning in the same channel
-            let next_event = timer.next_event();
+                    let start_time = Instant::now();
+                    // TODO: check error
+                    let _ = self.radio.transmit(&data_pdu_buffer).await;
 
-            while Instant::now() < next_event {
-                self.receive_scan(&adv_addr, &scan_rsp_buffer).await?;
-            }
+                    Timer::after(T_IFS).await;
+
+                    let _ = with_deadline(
+                        start_time + T_MAX_BETWEEN_ADV_PACKAGE,
+                        self.receive_scan_loop(&adv_addr, &scan_rsp_buffer),
+                    )
+                    .await;
+                }
+            })
+            .await;
         }
     }
 
@@ -155,7 +171,6 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
         adv_addr: &Address,
         scan_data: &[u8],
     ) -> Result<(), R::Error> {
-        trace!("scan loop");
         loop {
             self.receive_scan(adv_addr, scan_data).await?;
         }
@@ -166,8 +181,6 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
 
         self.radio.receive(&mut rcv_buffer).await?;
 
-        let received_time = Instant::now();
-
         if !self.radio.crc_ok() {
             return Ok(());
         }
@@ -177,15 +190,15 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
             return Ok(());
         };
 
-        trace!("Received scan request {:?}", scan_req);
-        /*
+        // trace!("Received scan request {:?}", scan_req);
+
         if scan_req.adv_address != *adv_addr {
             return Ok(());
         }
-        */
 
         // Wait for the minimum AUX Frame Space
-        Timer::at(received_time + T_IFS).await;
+        // TODO: capture time before parser
+        Timer::after(T_IFS).await;
 
         trace!("Sending scan response");
         // TODO: check witch channel you should send the scan response
