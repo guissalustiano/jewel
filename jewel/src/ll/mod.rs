@@ -3,6 +3,7 @@ mod adv;
 
 pub use address::*;
 pub use adv::*;
+use defmt::trace;
 use embassy_time::{with_deadline, Duration, Instant, Timer};
 
 use rand::{rngs::SmallRng, Rng, SeedableRng};
@@ -77,6 +78,15 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
         self.radio.set_crc_poly(CRC_POLY);
     }
 
+    async fn transmit_adv(&mut self, pdu: &[u8]) -> Result<(), R::Error> {
+        for channel in AdvertisingChannel::channels() {
+            self.radio.set_channel(channel.into());
+            self.radio.transmit(pdu).await?;
+        }
+
+        Ok(())
+    }
+
     pub async fn adv_nonconnectable_nonscannable_undirected<'a>(
         mut self,
         interval: Duration,
@@ -97,10 +107,7 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
         loop {
             Timer::at(timer.next_event()).await;
 
-            for channel in AdvertisingChannel::channels() {
-                self.radio.set_channel(channel.into());
-                self.radio.transmit(&data_pdu_buffer).await?;
-            }
+            self.transmit_adv(&data_pdu_buffer).await?;
         }
     }
 
@@ -116,30 +123,75 @@ impl<'r, R: Radio> LinkLayer<'r, R> {
         self.setup_legacy_adv();
         let mut timer = AdvertisingTimer::new(rng, interval);
 
-        let addr = self.radio.device_address();
-        let data_pdu = AdvNonconnInd::new(addr, adv_data);
-        //let data_pdu = AdvScanInd::new(addr, adv_data);
+        //let adv_addr = self.radio.device_address();
+        let adv_addr = Address::new_public(0x112233445566);
+        let data_pdu = AdvScanInd::new(adv_addr.clone(), adv_data);
+        let scan_rsp = ScanRsp::new(adv_addr.clone(), scan_data);
 
         let mut data_pdu_buffer = [0u8; MAX_PDU_LENGTH];
         data_pdu.bytes(&mut data_pdu_buffer);
 
+        let mut scan_rsp_buffer = [0u8; MAX_PDU_LENGTH];
+        scan_rsp.bytes(&mut scan_rsp_buffer);
+
         Timer::at(timer.next_event()).await;
         loop {
-            for channel in AdvertisingChannel::channels() {
-                self.radio.set_channel(channel.into());
-                self.radio.transmit(&data_pdu_buffer).await?;
-            }
+            self.transmit_adv(&data_pdu_buffer).await?;
 
             // while waiting for the next advertising event
             // we can receive scan requests
+            // TODO: check how long to wait for the scan requests
             // FIXME: it is always scanning in the same channel
-            let _ = with_deadline(timer.next_event(), self.receive_scan()).await;
+            let next_event = timer.next_event();
+
+            while Instant::now() < next_event {
+                self.receive_scan(&adv_addr, &scan_rsp_buffer).await?;
+            }
         }
     }
 
-    async fn receive_scan(&mut self) {
-        let mut rcv_buffer = [0u8; MAX_PDU_LENGTH];
-        let _ = self.radio.receive(&mut rcv_buffer).await;
+    async fn receive_scan_loop(
+        &mut self,
+        adv_addr: &Address,
+        scan_data: &[u8],
+    ) -> Result<(), R::Error> {
+        trace!("scan loop");
+        loop {
+            self.receive_scan(adv_addr, scan_data).await?;
+        }
+    }
+
+    async fn receive_scan(&mut self, adv_addr: &Address, scan_data: &[u8]) -> Result<(), R::Error> {
+        let mut rcv_buffer = [0u8; 5 * MAX_PDU_LENGTH];
+
+        self.radio.receive(&mut rcv_buffer).await?;
+
+        let received_time = Instant::now();
+
+        if !self.radio.crc_ok() {
+            return Ok(());
+        }
+        //trace!("CRC OK");
+
+        let Ok(scan_req) = ScanReq::parse(&rcv_buffer) else {
+            return Ok(());
+        };
+
+        trace!("Received scan request {:?}", scan_req);
+        /*
+        if scan_req.adv_address != *adv_addr {
+            return Ok(());
+        }
+        */
+
+        // Wait for the minimum AUX Frame Space
+        Timer::at(received_time + T_IFS).await;
+
+        trace!("Sending scan response");
+        // TODO: check witch channel you should send the scan response
+        self.radio.transmit(scan_data).await?;
+
+        Ok(())
     }
 }
 

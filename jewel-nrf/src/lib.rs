@@ -91,6 +91,12 @@ impl<'d, T: Instance> Radio for RadioImpl<'d, T> {
         self.radio.receive(buffer).await
     }
 
+    fn crc_ok(&self) -> bool {
+        let radio: embassy_nrf::pac::RADIO = unsafe { mem::transmute(()) };
+        //radio.events_crcok.read().bits() != 0
+        radio.crcstatus.read().crcstatus().is_crcok()
+    }
+
     fn device_address(&self) -> Address {
         let ficr: embassy_nrf::pac::FICR = unsafe { mem::transmute(()) };
         let device_address_public = ficr.deviceaddrtype.read().deviceaddrtype().is_public();

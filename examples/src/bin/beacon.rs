@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use defmt::info;
+use defmt::{info, unwrap};
 use embassy_executor::Spawner;
 use embassy_nrf::{bind_interrupts, peripherals, radio};
 use embassy_time::Duration;
@@ -39,11 +39,12 @@ async fn main(_spawner: Spawner) {
 
     let ll = LinkLayer::new(&mut radio);
 
-    ll.adv_nonconnectable_scannable_undirected(
-        Duration::from_millis(300),
-        adv_data_buffer,
-        scan_data_buffer,
-    )
-    .await
-    .unwrap();
+    unwrap!(
+        ll.adv_nonconnectable_scannable_undirected(
+            Duration::from_millis(500),
+            adv_data_buffer,
+            scan_data_buffer,
+        )
+        .await
+    );
 }

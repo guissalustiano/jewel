@@ -96,5 +96,7 @@ pub trait Radio {
 
     fn device_address(&self) -> Address;
 
+    fn crc_ok(&self) -> bool;
+
     // TODO: Hardware Link Layer device filtering (6.20.10 Device address match)
 }

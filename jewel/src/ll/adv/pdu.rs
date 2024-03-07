@@ -1,6 +1,7 @@
 //! Ref: [Core 6.B.2.3.1](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-8909a735-7143-2804-ce68-c535a4fc011d)
 
 use crate::ll::Address;
+use defmt::trace;
 use defmt::Format;
 
 use super::Header;
@@ -115,11 +116,12 @@ pub trait TwoAddress: Sized {
         }
 
         let (header, pdu) = bytes.split_at(2);
-
-        let header = Header::parse(header.try_into().unwrap());
+        let header = Header::parse(header.try_into().map_err(|_| ParseError::InvalidHeader)?);
         if header.flags.pdu_type != Self::PDU_TYPE {
             return Err(ParseError::InvalidType);
         }
+        //trace!("Header: {:?}", header);
+
         if header.length as usize > 37 {
             return Err(ParseError::InvalidLength);
         }
@@ -127,12 +129,15 @@ pub trait TwoAddress: Sized {
         let (first, second) = pdu.split_at(6);
 
         let first = Address::new_le(
-            first.try_into().unwrap(),
+            first.try_into().map_err(|_| ParseError::InvalidLength)?,
             Header::bit_to_address_type(header.flags.tx_add),
         );
+        //trace!("First: {:?}", first);
 
         let second = Address::new_le(
-            second.try_into().unwrap(),
+            second[0..6]
+                .try_into()
+                .map_err(|_| ParseError::InvalidLength)?,
             Header::bit_to_address_type(header.flags.rx_add),
         );
 
@@ -557,8 +562,8 @@ mod scan_req {
 
     #[derive(Debug, Clone, PartialEq, Eq, Format)]
     pub struct ScanReq {
-        scan_address: Address,
-        adv_address: Address,
+        pub(crate) scan_address: Address,
+        pub(crate) adv_address: Address,
     }
 
     impl ScanReq {

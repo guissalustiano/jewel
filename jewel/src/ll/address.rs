@@ -13,11 +13,17 @@
 /// Ref: https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/low-energy-controller/link-layer-specification.html#UUID-3815b05a-b69c-4e3c-5897-c8d3baa4fc30
 use defmt::Format;
 
-#[derive(Debug, Clone, Eq, PartialEq, Format)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Address {
     // Little endian address
     address_le: [u8; 6],
     pub r#type: AddressType,
+}
+
+impl Format for Address {
+    fn format(&self, f: defmt::Formatter) {
+        defmt::write!(f, "Address({:#08X}, {:?})", self.u64_address(), self.r#type);
+    }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Format)]
@@ -74,5 +80,18 @@ impl Address {
     /// ```
     pub fn bytes(&self) -> [u8; 6] {
         self.address_le
+    }
+
+    fn u64_address(&self) -> u64 {
+        u64::from_le_bytes([
+            self.address_le[0],
+            self.address_le[1],
+            self.address_le[2],
+            self.address_le[3],
+            self.address_le[4],
+            self.address_le[5],
+            0,
+            0,
+        ])
     }
 }
