@@ -37,21 +37,29 @@ impl<'d, T: Instance> Radio for RadioImpl<'d, T> {
 
     fn set_tx_power(&mut self, power_db: i8) {
         let tx_power: TxPower = match power_db {
-            8..=i8::MAX => TxPower::POS8D_BM,
+            #[cfg(not(feature = "nrf5340"))]
+            8 => TxPower::POS8D_BM,
+            #[cfg(not(feature = "nrf5340"))]
             7 => TxPower::POS7D_BM,
+            #[cfg(not(feature = "nrf5340"))]
             6 => TxPower::POS6D_BM,
+            #[cfg(not(feature = "nrf5340"))]
             5 => TxPower::POS5D_BM,
+            #[cfg(not(feature = "nrf5340"))]
             4 => TxPower::POS4D_BM,
+            #[cfg(not(feature = "nrf5340"))]
             3 => TxPower::POS3D_BM,
-            1..=2 => TxPower::POS2D_BM,
-            -3..=0 => TxPower::_0D_BM,
-            -7..=-4 => TxPower::NEG4D_BM,
-            -11..=-8 => TxPower::NEG8D_BM,
-            -15..=-12 => TxPower::NEG12D_BM,
-            -19..=-16 => TxPower::NEG16D_BM,
-            -29..=-20 => TxPower::NEG20D_BM,
-            -39..=-30 => TxPower::NEG30D_BM,
-            i8::MIN..=-40 => TxPower::NEG40D_BM,
+            #[cfg(not(feature = "nrf5340"))]
+            2 => TxPower::POS2D_BM,
+            0 => TxPower::_0D_BM,
+            -4 => TxPower::NEG4D_BM,
+            -8 => TxPower::NEG8D_BM,
+            -12 => TxPower::NEG12D_BM,
+            -16 => TxPower::NEG16D_BM,
+            -20 => TxPower::NEG20D_BM,
+            -30 => TxPower::NEG30D_BM,
+            -40 => TxPower::NEG40D_BM,
+            _ => panic!("Invalid power level"),
         };
 
         self.radio.set_tx_power(tx_power)
