@@ -1,3 +1,4 @@
+Deprecated in favor of [trouble](https://github.com/embassy-rs/trouble/)
 # Jewel
 BLE for a bare-metal, real-time system.
 
