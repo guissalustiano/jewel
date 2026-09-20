@@ -8,5 +8,4 @@ BLE for a bare-metal, real-time system.
 > For commercial Bluetooth take a look at [nrf-softdevice](https://github.com/embassy-rs/nrf-softdevice)
 
 # Current Features
-- The minimal broadcast profiler
-
+- The minimal broadcaster
